@@ -1,5 +1,5 @@
-#ifndef _SPACEWAR_H             // このファイルが複数の箇所でインクルードされる場合に、
-#define _SPACEWAR_H             // 多重に定義されることを防ぎます。
+#ifndef _CRUSHEDBOX_H             // このファイルが複数の箇所でインクルードされる場合に、
+#define _CRUSHEDBOX_H             // 多重に定義されることを防ぎます。
 #define WIN32_LEAN_AND_MEAN
 
 #include <string>
@@ -7,11 +7,9 @@
 #include "textureManager.h"
 #include "image.h"
 #include "dashboard.h"
-#include "planet.h"
-#include "ship.h"
-#include "torpedo.h"
+#include "box.h"
 
-namespace spacewarNS
+namespace crusedBoxNS
 {
 	const char FONT[] = "Arial Bold";	// フォント
 	const int FONT_BIG_SIZE = 256;		// フォントの高さ
@@ -35,16 +33,14 @@ namespace spacewarNS
 //=============================================================================
 // Gameクラスを継承してSpacewarクラスを作成
 //=============================================================================
-class Spacewar : public Game
+class CrushedBox : public Game
 {
 private:
 	// ゲームアイテム
 	TextureManager menuTexture;		// タイトルのテクスチャ
 	TextureManager nebulaTexture;	// 星雲（nebula）のテクスチャ
 	TextureManager gameTextures;	// ゲームに使用するテクスチャ群
-	Ship ship1, ship2;				// 宇宙船
-	Torpedo torpedo1, torpedo2;		// ミサイル
-	Planet planet;					// 惑星（planet）
+	Box box;						// 箱
 	Image nebula;					// 星雲（nebula）の画像
 	Image   menu;					// メニューの画像
 	Bar     healthBar;				// 宇宙船の体力バー
@@ -53,19 +49,19 @@ private:
 	bool    menuOn;
 	bool    countDownOn;			// カウントダウンが表示されている場合、true
 	float   countDownTimer;
-	char buffer[spacewarNS::BUF_SIZE];
+	char buffer[crusedBoxNS::BUF_SIZE];
 	// ラウンド中で宇宙船のスコアが計算される場合、true
-	bool    ship1Scored, ship2Scored;
+	bool    boxScored;
 	bool    roundOver;				// ラウンドが終了した場合、true
 	float   roundTimer;				// 新しいラウンドが開始するまでの時間
-	int     ship1Score, ship2Score; // スコア
+	int     boxScore; // スコア
 
 public:
 	// コンストラクタ
-	Spacewar();
+	CrushedBox();
 
 	// デストラクタ
-	virtual ~Spacewar();
+	virtual ~CrushedBox();
 
 	// ゲームを初期化
 	void initialize(HWND hwnd);

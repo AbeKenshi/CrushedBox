@@ -58,14 +58,10 @@ const UCHAR CONSOLE_KEY = '`';         // ` key
 const UCHAR ESC_KEY = VK_ESCAPE;   // escape key
 const UCHAR ALT_KEY = VK_MENU;     // Alt key
 const UCHAR ENTER_KEY = VK_RETURN;   // Enter key
-const UCHAR SHIP1_LEFT_KEY = 'A';
-const UCHAR SHIP1_RIGHT_KEY = 'D';
-const UCHAR SHIP1_FORWARD_KEY = 'W';
-const UCHAR SHIP1_FIRE_KEY = 'S';
-const UCHAR SHIP2_LEFT_KEY = VK_LEFT; // left arrow
-const UCHAR SHIP2_RIGHT_KEY = VK_RIGHT; // right arrow
-const UCHAR SHIP2_FORWARD_KEY = VK_UP;   // up arrow
-const UCHAR SHIP2_FIRE_KEY = VK_DOWN; // down arrow
+const UCHAR BOX_LEFT_KEY = 'A';
+const UCHAR BOX_RIGHT_KEY = 'D';
+const UCHAR BOX_FORWARD_KEY = 'W';
+const UCHAR BOX_FIRE_KEY = 'S';
 
 									  // weapon types
 enum WEAPON { TORPEDO, SHIP, PLANET };

@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="audio.h" />
+    <ClInclude Include="box.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="dashboard.h" />
@@ -148,15 +149,13 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="inputDialog.h" />
     <ClInclude Include="messageDialog.h" />
-    <ClInclude Include="planet.h" />
-    <ClInclude Include="ship.h" />
-    <ClInclude Include="spacewar.h" />
+    <ClInclude Include="crushedBox.h" />
     <ClInclude Include="textDX.h" />
     <ClInclude Include="textureManager.h" />
-    <ClInclude Include="torpedo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="audio.cpp" />
+    <ClCompile Include="box.cpp" />
     <ClCompile Include="console.cpp" />
     <ClCompile Include="dashboard.cpp" />
     <ClCompile Include="entity.cpp" />
@@ -166,12 +165,9 @@
     <ClCompile Include="input.cpp" />
     <ClCompile Include="inputDialog.cpp" />
     <ClCompile Include="messageDialog.cpp" />
-    <ClCompile Include="planet.cpp" />
-    <ClCompile Include="ship.cpp" />
-    <ClCompile Include="spacewar.cpp" />
+    <ClCompile Include="crushedBox.cpp" />
     <ClCompile Include="textDX.cpp" />
     <ClCompile Include="textureManager.cpp" />
-    <ClCompile Include="torpedo.cpp" />
     <ClCompile Include="winmain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

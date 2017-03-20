@@ -4,7 +4,7 @@
 #include "windows.h"
 #include <stdlib.h>			// メモリリークを検出するため
 #include <crtdbg.h>			// メモリリークを検出するため
-#include "spacewar.h"
+#include "crushedBox.h"
 
 // 関数プロトタイプ
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int);
@@ -13,7 +13,7 @@ LRESULT WINAPI WinProc(HWND, UINT, WPARAM, LPARAM);
 bool AnotherInstance();
 
 // Gameポインタ
-Spacewar *game = NULL;
+CrushedBox *game = NULL;
 HWND hwnd = NULL;
 
 // Windowsアプリケーションの開始点
@@ -33,7 +33,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInstance, LPSTR lpCmdLine,
 	MSG msg;
 
 	// Create the game, sets up message handler
-	game = new Spacewar;
+	game = new CrushedBox;
 
 	// 複数のインスタンスの生成を防ぐ
 	if (AnotherInstance())
