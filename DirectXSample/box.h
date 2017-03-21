@@ -22,12 +22,6 @@ namespace boxNS
 	const int   EXPLOSION_START_FRAME = 32;		// 爆発の開始フレーム
 	const int   EXPLOSION_END_FRAME = 39;		// 爆発の終了フレーム
 	const float EXPLOSION_ANIMATION_DELAY = 0.2f;   // フレーム間の時間
-	const int   ENGINE_START_FRAME = 16;		// エンジンの開始フレーム
-	const int   ENGINE_END_FRAME = 19;			// エンジンの終了フレーム
-	const float ENGINE_ANIMATION_DELAY = 0.1f;  // フレーム間の時間
-	const int   SHIELD_START_FRAME = 24;		// シールドの開始フレーム
-	const int   SHIELD_END_FRAME = 27;			// シールドの終了フレーム
-	const float SHIELD_ANIMATION_DELAY = 0.1f;	// フレーム間の時間
 	const float TORPEDO_DAMAGE = 46;			// ミサイルによるダメージの大きさ
 	const float SHIP_DAMAGE = 10;				// 他の宇宙船との衝突によるダメージの大きさ
 }
@@ -41,10 +35,6 @@ private:
     boxNS::DIRECTION direction;    // 回転の方向
 	float   explosionTimer;
 	bool    explosionOn;
-    bool    engineOn;               // trueで宇宙船が前に進む
-	bool    shieldOn;
-	Image   engine;
-	Image   shield;
 	Image   explosion;
 public:
 	// コンストラクタ
@@ -59,28 +49,9 @@ public:
 	// WEAPONで宇宙船でダメージを与える
 	void damage(WEAPON);
 	// 新しいメンバー関数
-	// 宇宙船を衝突から離すように移動
-	void toOldPosition()
-	{
-		spriteData.x = oldX;
-		spriteData.y = oldY,
-			spriteData.angle = oldAngle;
-		rotation = 0.0f;
-	}
 	// 回転を戻す
 	float getRotation() { return rotation; }
 
-	// engineOnの状態を戻す
-	bool getEngineOn() { return engineOn; }
-
-	// shieldOnの状態を戻す
-	bool getShieldOn() { return shieldOn; }
-
-	// エンジンをオンに設定
-	void setEngineOn(bool eng) { engineOn = eng; }
-
-	// シールドをオンに設定
-	void setShieldOn(bool sh) { shieldOn = sh; }
 
 	// 質量を設定
 	void setMass(float m) { mass = m; }

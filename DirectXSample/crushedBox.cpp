@@ -63,6 +63,18 @@ void CrushedBox::initialize(HWND hwnd)
 	// 色指定
 	box.setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
 
+	// 箱のリストを空にする
+	boxes.clear();
+	for (int i = 0; i < 2; ++i) {
+		boxes.push_back(new Box());
+		boxes.at(i)->setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
+		boxes.at(i)->setCurrentFrame(boxNS::BOX_START_FRAME);
+		boxes.at(i)->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
+		boxes.at(i)->setX(32 * i);
+		boxes.at(i)->setY(100);
+		boxes.at(i)->setVelocity(VECTOR2(0, 0));
+	}
+
 	// 体力バー
 	healthBar.initialize(graphics, &gameTextures, 0, crusedBoxNS::HEALTHBAR_Y, 2.0f, graphicsNS::WHITE);
 
@@ -100,12 +112,10 @@ void CrushedBox::update()
 			// エンジンを有効にする場合
 			if (input->isKeyDown(BOX_FORWARD_KEY) || input->getGamepadDPadUp(0))
 			{
-				box.setEngineOn(true);
 				audio->playCue(ENGINE1);
 			}
 			else
 			{
-				box.setEngineOn(false);
 				audio->stopCue(ENGINE1);
 			}
 			box.rotate(boxNS::NONE);
@@ -115,6 +125,12 @@ void CrushedBox::update()
 			// 宇宙船1を右に向ける場合
 			if (input->isKeyDown(BOX_RIGHT_KEY) || input->getGamepadDPadRight(0))
 				box.rotate(boxNS::RIGHT);
+			box.update(frameTime);
+		}
+		for (int i = 0; i < boxes.size(); ++i) {
+			if (boxes.at(i)->getActive()) {
+				boxes.at(i)->getActive();
+			}
 		}
 		if (roundOver)
 		{
@@ -124,8 +140,6 @@ void CrushedBox::update()
 		}
 	}
 
-	// エンティティを更新
-	box.update(frameTime);
 }
 
 //=============================================================================
@@ -178,11 +192,14 @@ void CrushedBox::render()
 	healthBar.set(box.getHealth());
 	healthBar.draw(crusedBoxNS::SHIP1_COLOR);
 	
-	// 宇宙船を描画
-	box.draw();
 
 	// 箱を描画
 	box.draw();
+
+	// 箱を描画
+	for (int i = 0; i < boxes.size(); ++i) {
+		boxes.at(i)->draw();
+	}
 
 	if (menuOn)
 		menu.draw();

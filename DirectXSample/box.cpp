@@ -26,8 +26,6 @@ Box::Box() : Entity()
 	radius = boxNS::WIDTH / 2.0;
 	collisionType = entityNS::CIRCLE;
 	direction = boxNS::NONE;                   // 回転の力の方向
-	engineOn = false;
-	shieldOn = false;
 	explosionOn = false;
 }
 
@@ -38,15 +36,6 @@ Box::Box() : Entity()
 bool Box::initialize(Game *gamePtr, int width, int height, int ncols,
 	TextureManager *textureM)
 {
-	engine.initialize(gamePtr->getGraphics(), width, height, ncols, textureM);
-	engine.setFrames(boxNS::ENGINE_START_FRAME, boxNS::ENGINE_END_FRAME);
-	engine.setCurrentFrame(boxNS::ENGINE_START_FRAME);
-	engine.setFrameDelay(boxNS::ENGINE_ANIMATION_DELAY);
-	shield.initialize(gamePtr->getGraphics(), width, height, ncols, textureM);
-	shield.setFrames(boxNS::SHIELD_START_FRAME, boxNS::SHIELD_END_FRAME);
-	shield.setCurrentFrame(boxNS::SHIELD_START_FRAME);
-	shield.setFrameDelay(boxNS::SHIELD_ANIMATION_DELAY);
-	shield.setLoop(false);                  // アニメーションをループしない
 	explosion.initialize(gamePtr->getGraphics(), width, height, ncols, textureM);
 	explosion.setFrames(boxNS::EXPLOSION_START_FRAME, boxNS::EXPLOSION_END_FRAME);
 	explosion.setCurrentFrame(boxNS::EXPLOSION_START_FRAME);
@@ -65,11 +54,6 @@ void Box::draw()
 	else
 	{
 		Image::draw();						// 宇宙船を描画
-		if (engineOn)
-			engine.draw(spriteData);		// ロケットエンジンを描画
-		if (shieldOn)
-			// colorFilterを25%アルファを使ってシールドを描画
-			shield.draw(spriteData, graphicsNS::ALPHA50 & colorFilter);
 	}
 }
 
@@ -93,22 +77,6 @@ void Box::update(float frameTime)
 		}
 	}
 
-	if (shieldOn)
-	{
-		shield.update(frameTime);
-		if (shield.getAnimationComplete())
-		{
-			shieldOn = false;
-			shield.setAnimationComplete(false);
-		}
-	}
-
-	if (engineOn)
-	{
-		velocity.x += (float)cos(spriteData.angle) * boxNS::FIRST_SPEED * frameTime;
-		velocity.y += (float)sin(spriteData.angle) * boxNS::FIRST_SPEED * frameTime;
-		engine.update(frameTime);
-	}
 	velocity.y = (float)boxNS::VELOCITY_Y;
 
 
@@ -135,8 +103,6 @@ void Box::update(float frameTime)
 //=============================================================================
 void Box::damage(WEAPON weapon)
 {
-	if (shieldOn)
-		return;
 
 	switch (weapon)
 	{
@@ -154,8 +120,6 @@ void Box::damage(WEAPON weapon)
 	}
 	if (health <= 0)
 		explode();
-	else
-		shieldOn = true;
 }
 
 //=============================================================================
@@ -167,8 +131,6 @@ void Box::explode()
 	active = false;
 	health = 0;
 	explosionOn = true;
-	engineOn = false;
-	shieldOn = false;
 	velocity.x = 0.0f;
 	velocity.y = 0.0f;
 }
@@ -181,8 +143,6 @@ void Box::repair()
 	active = true;
 	health = FULL_HEALTH;
 	explosionOn = false;
-	engineOn = false;
-	shieldOn = false;
 	rotation = 0.0f;
 	direction = boxNS::NONE;           // 回転の力の方向
 	visible = true;

@@ -8,6 +8,7 @@
 #include "image.h"
 #include "dashboard.h"
 #include "box.h"
+#include <vector>
 
 namespace crusedBoxNS
 {
@@ -41,6 +42,7 @@ private:
 	TextureManager nebulaTexture;	// 星雲（nebula）のテクスチャ
 	TextureManager gameTextures;	// ゲームに使用するテクスチャ群
 	Box box;						// 箱
+	std::vector<Box*> boxes;			// 箱のリスト
 	Image nebula;					// 星雲（nebula）の画像
 	Image   menu;					// メニューの画像
 	Bar     healthBar;				// 宇宙船の体力バー
