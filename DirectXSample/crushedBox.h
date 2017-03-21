@@ -41,8 +41,8 @@ private:
 	TextureManager menuTexture;		// タイトルのテクスチャ
 	TextureManager nebulaTexture;	// 星雲（nebula）のテクスチャ
 	TextureManager gameTextures;	// ゲームに使用するテクスチャ群
-	Box box;						// 箱
-	std::vector<Box*> boxes;			// 箱のリスト
+	Box* fallingBox;					// 落下中の箱
+	Box* boxInfo[10][10];					// ステージ上に固定された箱情報
 	Image nebula;					// 星雲（nebula）の画像
 	Image   menu;					// メニューの画像
 	Bar     healthBar;				// 宇宙船の体力バー
@@ -75,6 +75,8 @@ public:
 	void roundStart();		// プレイの新しいラウンドを開始
 	void releaseAll();
 	void resetAll();
+
+	Box& createNewBox();
 };
 
 #endif

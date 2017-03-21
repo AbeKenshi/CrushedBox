@@ -6,6 +6,11 @@
 //=============================================================================
 CrushedBox::CrushedBox()
 {
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			boxInfo[i][j] = NULL;
+		}
+	}
 	menuOn = true;
 	countDownOn = false;
 	roundOver = false;
@@ -19,6 +24,14 @@ CrushedBox::CrushedBox()
 //=============================================================================
 CrushedBox::~CrushedBox()
 {
+	// 固定された箱のメモリを解放
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (boxInfo[i][j] != NULL) {
+				safeDelete(boxInfo[i][j]);
+			}
+		}
+	}
 	releaseAll();           // すべてのグラフィックスアイテムについて、onLostDevie()を呼び出す
 }
 
@@ -56,32 +69,22 @@ void CrushedBox::initialize(HWND hwnd)
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula"));
 
 	// 箱
-	if (!box.initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &gameTextures))
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
-	box.setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
-	box.setCurrentFrame(boxNS::BOX_START_FRAME);
-	// 色指定
-	box.setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
+	fallingBox = &(createNewBox());
+	//if (!fallingBox.initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &gameTextures))
+	//	throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
+	//fallingBox.setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
+	//fallingBox.setCurrentFrame(boxNS::BOX_START_FRAME);
+	//// 色指定
+	//fallingBox.setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
+	//// 箱の初期位置指定
+	//fallingBox.setX(100);
+	//fallingBox.setY(100);
+	//fallingBox.setVelocity(VECTOR2(0, 0));
 
-	// 箱のリストを空にする
-	boxes.clear();
-	for (int i = 0; i < 2; ++i) {
-		boxes.push_back(new Box());
-		boxes.at(i)->setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
-		boxes.at(i)->setCurrentFrame(boxNS::BOX_START_FRAME);
-		boxes.at(i)->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
-		boxes.at(i)->setX(32 * i);
-		boxes.at(i)->setY(100);
-		boxes.at(i)->setVelocity(VECTOR2(0, 0));
-	}
 
 	// 体力バー
 	healthBar.initialize(graphics, &gameTextures, 0, crusedBoxNS::HEALTHBAR_Y, 2.0f, graphicsNS::WHITE);
 
-	// 箱の初期位置指定
-	box.setX(100);
-	box.setY(100);
-	box.setVelocity(VECTOR2(0, 0));
 	return;
 }
 
@@ -107,29 +110,14 @@ void CrushedBox::update()
 	}
 	else
 	{
-		if (box.getActive())
+		if (fallingBox->getActive())
 		{
-			// エンジンを有効にする場合
-			if (input->isKeyDown(BOX_FORWARD_KEY) || input->getGamepadDPadUp(0))
-			{
-				audio->playCue(ENGINE1);
-			}
-			else
-			{
-				audio->stopCue(ENGINE1);
-			}
-			box.rotate(boxNS::NONE);
-			// 宇宙船1を左に向ける場合
-			if (input->isKeyDown(BOX_LEFT_KEY) || input->getGamepadDPadLeft(0))
-				box.rotate(boxNS::LEFT);
-			// 宇宙船1を右に向ける場合
-			if (input->isKeyDown(BOX_RIGHT_KEY) || input->getGamepadDPadRight(0))
-				box.rotate(boxNS::RIGHT);
-			box.update(frameTime);
-		}
-		for (int i = 0; i < boxes.size(); ++i) {
-			if (boxes.at(i)->getActive()) {
-				boxes.at(i)->getActive();
+			// 箱を落下
+			fallingBox->update(frameTime, boxInfo);
+			// 落下していた箱が接地した場合、ステージ情報をアップデート
+			if (fallingBox->getIsGrounded()) {
+				boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
+				fallingBox = &createNewBox();
 			}
 		}
 		if (roundOver)
@@ -148,11 +136,11 @@ void CrushedBox::update()
 void CrushedBox::roundStart()
 {
 	// 2つの宇宙船は惑星を挟んで両側から出発し、一定の軌道上を時計回りに周回
-	box.setX(GAME_WIDTH / 4 - boxNS::WIDTH);
-	box.setY(GAME_HEIGHT / 2 - boxNS::HEIGHT);
-	box.setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
-	box.setDegrees(0);
-	box.repair();
+	fallingBox->setX(100);
+	fallingBox->setY(0);
+	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
+	fallingBox->setDegrees(0);
+	fallingBox->repair();
 	countDownTimer = crusedBoxNS::COUNT_DOWN;
 	countDownOn = true;
 	roundOver = false;
@@ -189,16 +177,18 @@ void CrushedBox::render()
 	
 	// 体力バーを表示
 	healthBar.setX((float)crusedBoxNS::SHIP1_HEALTHBAR_X);
-	healthBar.set(box.getHealth());
+	healthBar.set(fallingBox->getHealth());
 	healthBar.draw(crusedBoxNS::SHIP1_COLOR);
-	
 
 	// 箱を描画
-	box.draw();
+	fallingBox->draw();
 
-	// 箱を描画
-	for (int i = 0; i < boxes.size(); ++i) {
-		boxes.at(i)->draw();
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (boxInfo[i][j] != NULL) {
+				boxInfo[i][j]->draw();
+			}
+		}
 	}
 
 	if (menuOn)
@@ -239,27 +229,37 @@ void CrushedBox::consoleCommand()
 		else
 			console->print("fps Off");
 	}
+	if (command == "objects")
+	{
+		for (int i = 0; i < 10; ++i) {
+			for (int j = 0; j < 10; ++j) {
+				if (boxInfo[i][j] != NULL) {
+					console->print(std::to_string(boxInfo[i][j]->getY()));
+				}
+			}
+		}
+	}
 
-//	if (command == "gravity off")
-//	{
-//		planet.setMass(0);
-//		console->print("Gravity Off");
-//	}
-//	else if (command == "gravity on")
-//	{
-//		planet.setMass(planetNS::MASS);
-//		console->print("Gravity On");
-//	}
-//	else if (command == "planet off")
-//	{
-//		planet.disable();
-//		console->print("Planet Off");
-//	}
-//	else if (command == "planet on")
-//	{
-//		planet.enable();
-//		console->print("Planet On");
-//	}
+	//	if (command == "gravity off")
+	//	{
+	//		planet.setMass(0);
+	//		console->print("Gravity Off");
+	//	}
+	//	else if (command == "gravity on")
+	//	{
+	//		planet.setMass(planetNS::MASS);
+	//		console->print("Gravity On");
+	//	}
+	//	else if (command == "planet off")
+	//	{
+	//		planet.disable();
+	//		console->print("Planet Off");
+	//	}
+	//	else if (command == "planet on")
+	//	{
+	//		planet.enable();
+	//		console->print("Planet On");
+	//	}
 }
 
 //=============================================================================
@@ -293,4 +293,22 @@ void CrushedBox::resetAll()
 
 	Game::resetAll();
 	return;
+}
+
+//=============================================================================
+// 新しいBoxオブジェクトを作るメソッド。
+//=============================================================================
+Box& CrushedBox::createNewBox()
+{
+	Box* newBox = new Box();
+	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &gameTextures))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
+	newBox->setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
+	newBox->setCurrentFrame(boxNS::BOX_START_FRAME);
+	// 色指定
+	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
+	// 箱の初期位置指定
+	newBox->setX(100);
+	newBox->setY(0);
+	return *newBox;
 }

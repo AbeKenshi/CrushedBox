@@ -11,6 +11,8 @@ Box::Box() : Entity()
 	spriteData.y = boxNS::Y;
 	spriteData.rect.bottom = boxNS::HEIGHT;    // 画面の一部を選択
 	spriteData.rect.right = boxNS::WIDTH;
+	fieldX = 0;
+	fieldY = 0;
 	oldX = boxNS::X;
 	oldY = boxNS::Y;
 	oldAngle = 0.0f;
@@ -27,6 +29,7 @@ Box::Box() : Entity()
 	collisionType = entityNS::CIRCLE;
 	direction = boxNS::NONE;                   // 回転の力の方向
 	explosionOn = false;
+	isGrounded = false;
 }
 
 //=============================================================================
@@ -62,7 +65,7 @@ void Box::draw()
 // 通常、フレームごとに1回呼び出す
 // frameTimeは、移動とアニメーションの速さを制御するために使用
 //=============================================================================
-void Box::update(float frameTime)
+void Box::update(float frameTime, Box* boxInfo[10][10])
 {
 	if (explosionOn)
 	{
@@ -84,8 +87,22 @@ void Box::update(float frameTime)
 	oldX = spriteData.x;                        // 現在の位置を保存
 	oldY = spriteData.y;
 	oldAngle = spriteData.angle;
+	
+	// 落下先が画面外or固定ボックスがあったら落下できない
+	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || boxInfo[fieldX][fieldY + 1] != NULL) {
+		isGrounded = true;
+	}
+	else {
+		spriteData.y += frameTime * velocity.y;     // 宇宙船をY方向に動かす
+	}
 
-	spriteData.y += frameTime * velocity.y;     // 宇宙船をY方向に動かす
+	// 箱が一定以上落下したら
+	if (spriteData.y >= (fieldY + 1) * boxNS::HEIGHT) {
+		// 箱のフィールド上の座標をアップデート
+		fieldY += 1;
+		// ずれが生じないように念のため位置を修正
+		spriteData.y = (fieldY) * boxNS::HEIGHT;
+	}
 
 	// 画面の端で回り込む
 	if (spriteData.x > GAME_WIDTH)              // 画面右端を超えたら
@@ -94,8 +111,6 @@ void Box::update(float frameTime)
 		spriteData.x = GAME_WIDTH;				// 画面右端に移動
 	if (spriteData.y < -boxNS::HEIGHT)			// 画面上端を超えたら
 		spriteData.y = GAME_HEIGHT;				// 画面下端に移動
-	if (spriteData.y > GAME_HEIGHT - boxNS::HEIGHT)         // 画面下端を超えたら
-		spriteData.y = GAME_HEIGHT - boxNS::HEIGHT;			// 画面上端に移動
 }
 
 //=============================================================================

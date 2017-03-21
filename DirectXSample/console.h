@@ -16,8 +16,8 @@
 
 namespace consoleNS
 {
-    const UINT WIDTH = 500;             // コンソールの矩形の幅（ピクセル単位）
-    const UINT HEIGHT = 400;            // コンソールの矩形の高さ（ピクセル単位）
+    const UINT WIDTH = 200;             // コンソールの矩形の幅（ピクセル単位）
+    const UINT HEIGHT = 200;            // コンソールの矩形の高さ（ピクセル単位）
     const UINT X = 5;                   // コンソールの左上隅からの画面位置
     const UINT Y = 5;
     const UINT MARGIN = 4;              // コンソールの端からテキストまでの余白

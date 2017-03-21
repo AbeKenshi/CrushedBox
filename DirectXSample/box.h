@@ -31,11 +31,13 @@ class Box : public Entity
 {
 private:
 	float   oldX, oldY, oldAngle;
+	int		fieldX, fieldY;
 	float   rotation;               // 現在の回転の速さ（ラジアン/秒）
     boxNS::DIRECTION direction;    // 回転の方向
 	float   explosionTimer;
 	bool    explosionOn;
 	Image   explosion;
+	bool	isGrounded;				// 接地して落下ができない状態かどうか
 public:
 	// コンストラクタ
 	Box();
@@ -45,7 +47,7 @@ public:
 	virtual bool initialize(Game *gamePtr, int width, int height, int ncols,
 		TextureManager *textureM);
 	// 宇宙船の位置と角度を更新
-	void update(float frameTime);
+	void update(float frameTime, Box* boxInfo[10][10]);
 	// WEAPONで宇宙船でダメージを与える
 	void damage(WEAPON);
 	// 新しいメンバー関数
@@ -67,6 +69,15 @@ public:
 
 	// 宇宙船を回復
 	void repair();
+	
+	// 接地中したかどうか
+	bool getIsGrounded() { return isGrounded; }
+
+	int getFieldX() { return fieldX; }
+
+	int getFieldY() {
+		return fieldY;
+	}
 };
 #endif
 
