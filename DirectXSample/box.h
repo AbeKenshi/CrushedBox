@@ -12,7 +12,7 @@ namespace boxNS
 	const int   X = GAME_WIDTH / 2 - WIDTH / 2; // 画面上の位置
 	const int   Y = GAME_HEIGHT / 6 - HEIGHT;
 	const float FIRST_SPEED = 0;					// 1秒あたり100ピクセル
-	const float VELOCITY_Y = 100.0f;			// Y軸方向の加速度	
+	const float VELOCITY_Y = 200.0f;			// Y軸方向の加速度	
 	enum DIRECTION { NONE, LEFT, RIGHT };		// 回転の方向
 	const int   TEXTURE_COLS = 8;				// テクスチャは8列
 	const int   BOX_START_FRAME = 0;			// 宇宙船1はフレーム0から開始
@@ -75,8 +75,16 @@ public:
 
 	int getFieldX() { return fieldX; }
 
+	void setFieldX(int x) {
+		fieldX = x;
+	}
+
 	int getFieldY() {
 		return fieldY;
+	}
+
+	void setFieldY(int y) {
+		fieldY = y;
 	}
 };
 #endif

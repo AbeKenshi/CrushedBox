@@ -136,11 +136,11 @@ void CrushedBox::update()
 void CrushedBox::roundStart()
 {
 	// 2つの宇宙船は惑星を挟んで両側から出発し、一定の軌道上を時計回りに周回
-	fallingBox->setX(100);
-	fallingBox->setY(0);
-	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
-	fallingBox->setDegrees(0);
-	fallingBox->repair();
+//	fallingBox->setX(100);
+//	fallingBox->setY(0);
+//	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
+//	fallingBox->setDegrees(0);
+//	fallingBox->repair();
 	countDownTimer = crusedBoxNS::COUNT_DOWN;
 	countDownOn = true;
 	roundOver = false;
@@ -308,7 +308,9 @@ Box& CrushedBox::createNewBox()
 	// 色指定
 	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
 	// 箱の初期位置指定
-	newBox->setX(100);
+	newBox->setX((rand() % 10) * boxNS::WIDTH);
+	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
 	newBox->setY(0);
+	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
