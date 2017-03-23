@@ -269,7 +269,7 @@ void CrushedBox::consoleCommand()
 			for (int i = 0; i < 10; ++i) {
 				str += ",";
 				if (boxInfo[i][j] != NULL) {
-					str += std::to_string(boxInfo[i][j]->getType());
+					str += std::to_string(boxInfo[i][j]->getType() + 1);
 				}
 				else {
 					str += "0";
@@ -278,27 +278,6 @@ void CrushedBox::consoleCommand()
 			console->print(str);
 		}
 	}
-
-	//	if (command == "gravity off")
-	//	{
-	//		planet.setMass(0);
-	//		console->print("Gravity Off");
-	//	}
-	//	else if (command == "gravity on")
-	//	{
-	//		planet.setMass(planetNS::MASS);
-	//		console->print("Gravity On");
-	//	}
-	//	else if (command == "planet off")
-	//	{
-	//		planet.disable();
-	//		console->print("Planet Off");
-	//	}
-	//	else if (command == "planet on")
-	//	{
-	//		planet.enable();
-	//		console->print("Planet On");
-	//	}
 }
 
 //=============================================================================

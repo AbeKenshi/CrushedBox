@@ -93,7 +93,7 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	if (!isGrounded) {
 		spriteData.y += frameTime * velocity.y;
 	}
-	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || boxInfo[fieldX][fieldY + 1] != NULL) {
+	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || (boxInfo[fieldX][fieldY + 1] != NULL && boxInfo[fieldX][fieldY+ 1]->getIsGrounded())) {
 		isGrounded = true;
 	}
 
