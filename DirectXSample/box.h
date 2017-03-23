@@ -12,7 +12,7 @@ namespace boxNS
 	const int   X = GAME_WIDTH / 2 - WIDTH / 2; // 画面上の位置
 	const int   Y = GAME_HEIGHT / 6 - HEIGHT;
 	const float FIRST_SPEED = 0;					// 1秒あたり100ピクセル
-	const float VELOCITY_Y = 200.0f;			// Y軸方向の加速度	
+	const float VELOCITY_Y = 400.0f;			// Y軸方向の加速度	
 	enum DIRECTION { NONE, LEFT, RIGHT };		// 回転の方向
 	const int   TEXTURE_COLS = 8;				// テクスチャは8列
 	const int   BOX_START_FRAME = 0;			// 宇宙船1はフレーム0から開始
@@ -34,6 +34,7 @@ private:
 	int		fieldX, fieldY;
 	float   rotation;               // 現在の回転の速さ（ラジアン/秒）
     boxNS::DIRECTION direction;    // 回転の方向
+	int		boxType;				// 箱の種類
 	float   explosionTimer;
 	bool    explosionOn;
 	Image   explosion;
@@ -72,6 +73,10 @@ public:
 	
 	// 接地中したかどうか
 	bool getIsGrounded() { return isGrounded; }
+	
+	void setIsGrounded(bool ig) {
+		isGrounded = ig;
+	}
 
 	int getFieldX() { return fieldX; }
 
@@ -85,6 +90,10 @@ public:
 
 	void setFieldY(int y) {
 		fieldY = y;
+	}
+	
+	int getType() {
+		return boxType;
 	}
 };
 #endif

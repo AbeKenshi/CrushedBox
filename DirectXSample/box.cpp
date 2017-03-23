@@ -24,6 +24,7 @@ Box::Box() : Entity()
 	startFrame = rand() % (boxNS::BOX_END_FRAME + 1);
 	// 宇宙船アニメーションの最後のフレーム
 	endFrame = startFrame;
+	boxType = startFrame;
 	currentFrame = startFrame;
 	radius = boxNS::WIDTH / 2.0;
 	collisionType = entityNS::CIRCLE;
@@ -89,11 +90,11 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	oldAngle = spriteData.angle;
 	
 	// 落下先が画面外or固定ボックスがあったら落下できない
+	if (!isGrounded) {
+		spriteData.y += frameTime * velocity.y;
+	}
 	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || boxInfo[fieldX][fieldY + 1] != NULL) {
 		isGrounded = true;
-	}
-	else {
-		spriteData.y += frameTime * velocity.y;     // 宇宙船をY方向に動かす
 	}
 
 	// 箱が一定以上落下したら

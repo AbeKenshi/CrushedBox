@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="audio.h" />
     <ClInclude Include="box.h" />
+    <ClInclude Include="boxSet.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="dashboard.h" />

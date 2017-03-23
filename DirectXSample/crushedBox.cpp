@@ -120,6 +120,24 @@ void CrushedBox::update()
 				fallingBox = &createNewBox();
 			}
 		}
+		for (int i = 0; i < 10; ++i) {
+			for (int j = 0; j < 10; ++j) {
+				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive()) {
+					boxInfo[i][j]->update(frameTime, boxInfo);
+					if (boxInfo[i][j]->getIsGrounded()) {
+						Box* tmp = boxInfo[i][j];
+						int x = boxInfo[i][j]->getFieldX();
+						int y = boxInfo[i][j]->getFieldY();
+						if (x != i || y != j) {
+							boxInfo[x][y] = tmp;
+							boxInfo[i][j] = NULL;
+						}
+						// boxInfo[boxInfo[i][j]->getFieldX()][boxInfo[i][j]->getFieldY()] = boxInfo[i][j];
+						// boxInfo[i][j] = NULL;
+					}
+				}
+			}
+		}
 		if (roundOver)
 		{
 			roundTimer -= frameTime;
@@ -174,7 +192,7 @@ void CrushedBox::render()
 	fontScore.setFontColor(crusedBoxNS::SHIP1_COLOR);
 	_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)boxScore);
 	fontScore.print(buffer, crusedBoxNS::SCORE1_X, crusedBoxNS::SCORE_Y);
-	
+
 	// 体力バーを表示
 	healthBar.setX((float)crusedBoxNS::SHIP1_HEALTHBAR_X);
 	healthBar.set(fallingBox->getHealth());
@@ -190,6 +208,8 @@ void CrushedBox::render()
 			}
 		}
 	}
+
+	checkClingingBox();
 
 	if (menuOn)
 		menu.draw();
@@ -240,6 +260,23 @@ void CrushedBox::consoleCommand()
 			}
 		}
 		console->print(std::to_string(fallingBox->getCurrentFrame()));
+	}
+	if (command == "debug")
+	{
+		//check();
+		for (int j = 0; j < 10; ++j) {
+			string str = "";
+			for (int i = 0; i < 10; ++i) {
+				str += ",";
+				if (boxInfo[i][j] != NULL) {
+					str += std::to_string(boxInfo[i][j]->getType());
+				}
+				else {
+					str += "0";
+				}
+			}
+			console->print(str);
+		}
 	}
 
 	//	if (command == "gravity off")
@@ -313,4 +350,190 @@ Box& CrushedBox::createNewBox()
 	newBox->setY(0);
 	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
+}
+
+//=============================================================================
+// ボックスの削除判定
+//=============================================================================
+bool CrushedBox::checkClingingBox() {
+	BoxSet* clungingBoxList[10][10];
+	BoxSet* damy[10][10];
+	// 画面内のすべてのボックスについて、隣接しているボックスの集合を初期化
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (boxInfo[i][j] != NULL) {
+				Box* box = boxInfo[i][j];
+				// ボックスセットの初期化
+				clungingBoxList[i][j] = new BoxSet(*box);
+			}
+			else {
+				clungingBoxList[i][j] = NULL;
+			}
+			damy[i][j] = clungingBoxList[i][j];
+		}
+	}
+	// 画面内のすべてのボックスについて、隣接する同色ボックス同士を結合
+	for (int j = 0; j < 10; ++j) {
+		for (int i = 0; i < 10; ++i) {
+			if (boxInfo[i][j] != NULL) {
+				Box* box = boxInfo[i][j];	// 各ボックス
+											// 下
+				int newI = i;
+				int newJ = j + 1;
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+					// 下に存在するボックスと色が同じなら、結合
+					int len = clungingBoxList[newI][newJ]->getBoxSize();
+					// 下に存在するボックスのリストと結合
+					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
+					// 下に存在するボックスのリスト内の各ブロックのリストを更新
+					for (int k = 0; k < len; ++k) {
+						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
+						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
+					}
+				}
+				// 右
+				newI = i + 1;
+				newJ = j;
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+					// 右に存在するボックスと色が同じなら、結合
+					int len = clungingBoxList[newI][newJ]->getBoxSize();
+					// 右に存在するボックスのリストと結合
+					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
+					// 右に存在するボックスのリスト内の各ブロックのリストを更新
+					for (int k = 0; k < len; ++k) {
+						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
+						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
+					}
+				}
+			}
+		}
+	}
+	bool flag = false;
+	for (int j = 0; j < 10; ++j) {
+		for (int i = 0; i < 10; ++i) {
+			if (boxInfo[i][j] != NULL) {
+				Box* box = boxInfo[i][j];
+				if (clungingBoxList[i][j] != NULL && clungingBoxList[i][j]->getBoxSize() >= 3) {
+					disappear(*clungingBoxList[i][j]);
+					clungingBoxList[i][j] = NULL;
+					flag = true;
+				}
+			}
+		}
+	}
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (damy[i][j] != NULL) {
+				safeDelete(damy[i][j]);
+			}
+		}
+	}
+	return flag;
+}
+
+//=============================================================================
+// 
+//=============================================================================
+void CrushedBox::check() {
+	BoxSet* clungingBoxList[10][10];
+	BoxSet* damy[10][10];
+	// 画面内のすべてのボックスについて、隣接しているボックスの集合を初期化
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (boxInfo[i][j] != NULL) {
+				Box* box = boxInfo[i][j];
+				// ボックスセットの初期化
+				clungingBoxList[i][j] = new BoxSet(*box);
+			}
+			else {
+				clungingBoxList[i][j] = NULL;
+			}
+			damy[i][j] = clungingBoxList[i][j];
+		}
+	}
+	// 画面内のすべてのボックスについて、隣接する同色ボックス同士を結合
+	for (int j = 0; j < 10; ++j) {
+		for (int i = 0; i < 10; ++i) {
+			if (boxInfo[i][j] != NULL) {
+				Box* box = boxInfo[i][j];	// 各ボックス
+				// 下
+				int newI = i;
+				int newJ = j + 1;
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+					// 下に存在するボックスと色が同じなら、結合
+					int len = clungingBoxList[newI][newJ]->getBoxSize();
+					// 下に存在するボックスのリストと結合
+					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
+					// 下に存在するボックスのリスト内の各ブロックのリストを更新
+					for (int k = 0; k < len; ++k) {
+						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
+						console->print(std::to_string(b->getFieldX()));
+						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
+					}
+				}
+				// 右
+				newI = i + 1;
+				newJ = j;
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+					// 右に存在するボックスと色が同じなら、結合
+					int len = clungingBoxList[newI][newJ]->getBoxSize();
+					// 右に存在するボックスのリストと結合
+					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
+					// 右に存在するボックスのリスト内の各ブロックのリストを更新
+					for (int k = 0; k < len; ++k) {
+						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
+						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
+					}
+				}
+			}
+		}
+	}
+	for (int j = 0; j < 10; ++j) {
+		string str = "";
+		for (int i = 0; i < 10; ++i) {
+			str += ",";
+			if (boxInfo[i][j] != NULL) {
+				Box* box = boxInfo[i][j];
+				if (clungingBoxList[i][j] != NULL) {
+					str += std::to_string(clungingBoxList[i][j]->getBoxSize());
+				}
+			}
+			else {
+				str += "0";
+			}
+		}
+		console->print(str);
+	}
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (damy[i][j] != NULL) {
+				safeDelete(damy[i][j]);
+			}
+		}
+	}
+}
+
+//=============================================================================
+// ２つのボックスセットを結合させる
+//=============================================================================
+void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
+	for (int i = 0; i < boxSet2.getBoxSize(); ++i) {
+		boxSet1.add(boxSet2.getBox(i));
+	}
+}
+
+//=============================================================================
+// ボックスセットを削除する
+//=============================================================================
+void CrushedBox::disappear(BoxSet& boxSet) {
+	// 各ボックスの情報を盤面情報から削除
+	for (int i = 0; i < boxSet.getBoxSize(); ++i) {
+		for (int j = 10 - 1; j > 10 - boxSet.getBox(i).getFieldY(); --j) {
+			if (boxInfo[boxSet.getBox(i).getFieldX()][j] != NULL) {
+				boxInfo[boxSet.getBox(i).getFieldX()][j]->setIsGrounded(false);
+			}
+		}
+		safeDelete(boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()]);
+		boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()] = NULL;
+	}
 }

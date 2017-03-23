@@ -8,7 +8,10 @@
 #include "image.h"
 #include "dashboard.h"
 #include "box.h"
-#include <vector>
+#include "boxSet.h"
+#include <map>
+
+using namespace std;
 
 namespace crusedBoxNS
 {
@@ -76,7 +79,16 @@ public:
 	void releaseAll();
 	void resetAll();
 
+	// 新しいボックスオブジェクトを作成
 	Box& createNewBox();
+	// ボックスの削除判定
+	bool checkClingingBox();
+	// ２つのボックスセットを結合させる
+	void clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2);
+	// ボックスセットを削除する
+	void disappear(BoxSet& boxSet);
+
+	void check();
 };
 
 #endif
