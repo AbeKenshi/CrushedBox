@@ -21,9 +21,9 @@ Box::Box() : Entity()
 	velocity.y = 0;
 	frameDelay = boxNS::BOX_ANIMATION_DELAY;
 	// 宇宙船アニメーションの最初のフレーム
-	startFrame = boxNS::BOX_START_FRAME;
+	startFrame = rand() % (boxNS::BOX_END_FRAME + 1);
 	// 宇宙船アニメーションの最後のフレーム
-	endFrame = boxNS::BOX_END_FRAME;
+	endFrame = startFrame;
 	currentFrame = startFrame;
 	radius = boxNS::WIDTH / 2.0;
 	collisionType = entityNS::CIRCLE;

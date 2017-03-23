@@ -235,9 +235,11 @@ void CrushedBox::consoleCommand()
 			for (int j = 0; j < 10; ++j) {
 				if (boxInfo[i][j] != NULL) {
 					console->print(std::to_string(boxInfo[i][j]->getY()));
+					console->print(std::to_string(boxInfo[i][j]->getCurrentFrame()));
 				}
 			}
 		}
+		console->print(std::to_string(fallingBox->getCurrentFrame()));
 	}
 
 	//	if (command == "gravity off")
@@ -303,8 +305,6 @@ Box& CrushedBox::createNewBox()
 	Box* newBox = new Box();
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &gameTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
-	newBox->setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
-	newBox->setCurrentFrame(boxNS::BOX_START_FRAME);
 	// 色指定
 	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
 	// 箱の初期位置指定

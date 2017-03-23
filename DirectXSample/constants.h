@@ -17,8 +17,8 @@
 const char CLASS_NAME[] = "Spacewar";
 const char GAME_TITLE[] = "Spacewar v1.2";
 const bool FULLSCREEN = false;              // windowed or fullscreen
-const UINT GAME_WIDTH = 320;               // width of game in pixels
-const UINT GAME_HEIGHT = 320;               // height of game in pixels
+const UINT GAME_WIDTH = 480;               // width of game in pixels
+const UINT GAME_HEIGHT = 480;               // height of game in pixels
 
 											// game
 const double PI = 3.14159265;
@@ -30,7 +30,7 @@ const float FULL_HEALTH = 100;
 
 // graphic images
 const char NEBULA_IMAGE[] = "pictures\\orion.jpg";     // photo source NASA/courtesy of nasaimages.org 
-const char TEXTURES_IMAGE[] = "pictures\\textures.png";  // game textures
+const char TEXTURES_IMAGE[] = "pictures\\puyo.png";  // game textures
 const char MENU_IMAGE[] = "pictures\\menu.png";      // menu texture
 const char DASHBOARD_TEXTURES[] = "pictures\\dashboard.png";
 
