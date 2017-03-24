@@ -14,7 +14,7 @@ namespace boxNS
 	const float FIRST_SPEED = 0;					// 1秒あたり100ピクセル
 	const float VELOCITY_Y = 400.0f;			// Y軸方向の加速度	
 	enum DIRECTION { NONE, LEFT, RIGHT };		// 回転の方向
-	const int   TEXTURE_COLS = 8;				// テクスチャは8列
+	const int   TEXTURE_COLS = 4;				// テクスチャは8列
 	const int   BOX_START_FRAME = 0;			// 宇宙船1はフレーム0から開始
 	// 宇宙船1のアニメーションフレームは0、1、2、3
 	const int   BOX_END_FRAME = 3;
@@ -74,24 +74,25 @@ public:
 	// 接地中したかどうか
 	bool getIsGrounded() { return isGrounded; }
 	
-	void setIsGrounded(bool ig) {
-		isGrounded = ig;
-	}
-
+	// フィールド上のX座標を返す
 	int getFieldX() { return fieldX; }
 
+	// フィールド上のX座標をセットする
 	void setFieldX(int x) {
 		fieldX = x;
 	}
 
+	// フィールド上のY座標を返す
 	int getFieldY() {
 		return fieldY;
 	}
 
+	// フィールド上のY座標をセットする
 	void setFieldY(int y) {
 		fieldY = y;
 	}
 	
+	// ボックスのタイプを返す
 	int getType() {
 		return boxType;
 	}

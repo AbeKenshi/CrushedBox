@@ -9,6 +9,7 @@
 #include "dashboard.h"
 #include "box.h"
 #include "boxSet.h"
+#include "player.h"
 #include <map>
 
 using namespace std;
@@ -44,8 +45,9 @@ private:
 	TextureManager menuTexture;		// タイトルのテクスチャ
 	TextureManager nebulaTexture;	// 星雲（nebula）のテクスチャ
 	TextureManager gameTextures;	// ゲームに使用するテクスチャ群
-	Box* fallingBox;					// 落下中の箱
-	Box* boxInfo[10][10];					// ステージ上に固定された箱情報
+	Player player;					// プレイヤーが操作するオブジェクト
+	Box* fallingBox;				// 落下中の箱
+	Box* boxInfo[10][10];			// ステージ上に固定された箱情報
 	Image nebula;					// 星雲（nebula）の画像
 	Image   menu;					// メニューの画像
 	Bar     healthBar;				// 宇宙船の体力バー

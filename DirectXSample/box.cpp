@@ -11,8 +11,8 @@ Box::Box() : Entity()
 	spriteData.y = boxNS::Y;
 	spriteData.rect.bottom = boxNS::HEIGHT;    // ‰æ–Ê‚Ìˆê•”‚ð‘I‘ð
 	spriteData.rect.right = boxNS::WIDTH;
-	fieldX = 0;
-	fieldY = 0;
+	fieldX = spriteData.x / boxNS::WIDTH;
+	fieldY = spriteData.y / boxNS::HEIGHT;
 	oldX = boxNS::X;
 	oldY = boxNS::Y;
 	oldAngle = 0.0f;

@@ -58,10 +58,10 @@ const UCHAR CONSOLE_KEY = '`';         // ` key
 const UCHAR ESC_KEY = VK_ESCAPE;   // escape key
 const UCHAR ALT_KEY = VK_MENU;     // Alt key
 const UCHAR ENTER_KEY = VK_RETURN;   // Enter key
-const UCHAR BOX_LEFT_KEY = 'A';
-const UCHAR BOX_RIGHT_KEY = 'D';
-const UCHAR BOX_FORWARD_KEY = 'W';
-const UCHAR BOX_FIRE_KEY = 'S';
+const UCHAR PLAYER_LEFT_KEY = 'A';
+const UCHAR PLAYER_RIGHT_KEY = 'D';
+const UCHAR PLAYER_UP_KEY = 'W';
+const UCHAR PLAYER_DOWN_KEY = 'S';
 
 									  // weapon types
 enum WEAPON { TORPEDO, SHIP, PLANET };

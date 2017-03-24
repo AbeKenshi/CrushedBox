@@ -70,17 +70,10 @@ void CrushedBox::initialize(HWND hwnd)
 
 	// 箱
 	fallingBox = &(createNewBox());
-	//if (!fallingBox.initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &gameTextures))
-	//	throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
-	//fallingBox.setFrames(boxNS::BOX_START_FRAME, boxNS::BOX_END_FRAME);
-	//fallingBox.setCurrentFrame(boxNS::BOX_START_FRAME);
-	//// 色指定
-	//fallingBox.setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
-	//// 箱の初期位置指定
-	//fallingBox.setX(100);
-	//fallingBox.setY(100);
-	//fallingBox.setVelocity(VECTOR2(0, 0));
 
+	// プレイヤー
+	if (!player.initialize(this, playerNS::WIDTH, playerNS::HEIGHT, playerNS::TEXTURE_COLS, &gameTextures))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player"));
 
 	// 体力バー
 	healthBar.initialize(graphics, &gameTextures, 0, crusedBoxNS::HEALTHBAR_Y, 2.0f, graphicsNS::WHITE);
@@ -110,6 +103,9 @@ void CrushedBox::update()
 	}
 	else
 	{
+		if (player.getActive()) {
+			player.update(frameTime, boxInfo);
+		}
 		if (fallingBox->getActive())
 		{
 			// 箱を落下
@@ -199,6 +195,9 @@ void CrushedBox::render()
 	healthBar.setX((float)crusedBoxNS::SHIP1_HEALTHBAR_X);
 	healthBar.set(fallingBox->getHealth());
 	healthBar.draw(crusedBoxNS::SHIP1_COLOR);
+
+	// プレイヤーを描画
+	player.draw();
 
 	// 箱を描画
 	fallingBox->draw();
@@ -528,11 +527,6 @@ void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
 void CrushedBox::disappear(BoxSet& boxSet) {
 	// 各ボックスの情報を盤面情報から削除
 	for (int i = 0; i < boxSet.getBoxSize(); ++i) {
-//		for (int j = 10 - 1; j > 10 - boxSet.getBox(i).getFieldY(); --j) {
-//			if (boxInfo[boxSet.getBox(i).getFieldX()][j] != NULL) {
-//				boxInfo[boxSet.getBox(i).getFieldX()][j]->setIsGrounded(false);
-//			}
-//		}
 		safeDelete(boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()]);
 		boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()] = NULL;
 	}
