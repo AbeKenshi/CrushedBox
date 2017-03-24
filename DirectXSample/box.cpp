@@ -93,8 +93,11 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	if (!isGrounded) {
 		spriteData.y += frameTime * velocity.y;
 	}
-	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || (boxInfo[fieldX][fieldY + 1] != NULL && boxInfo[fieldX][fieldY+ 1]->getIsGrounded())) {
+	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || (boxInfo[fieldX][fieldY + 1] != NULL && boxInfo[fieldX][fieldY + 1]->getIsGrounded())) {
 		isGrounded = true;
+	}
+	else {
+		isGrounded = false;
 	}
 
 	// 箱が一定以上落下したら
@@ -102,7 +105,7 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 		// 箱のフィールド上の座標をアップデート
 		fieldY += 1;
 		// ずれが生じないように念のため位置を修正
-		spriteData.y = (fieldY) * boxNS::HEIGHT;
+		spriteData.y = (fieldY)* boxNS::HEIGHT;
 	}
 
 	// 画面の端で回り込む

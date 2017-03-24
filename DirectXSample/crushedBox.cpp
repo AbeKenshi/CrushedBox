@@ -120,9 +120,11 @@ void CrushedBox::update()
 				fallingBox = &createNewBox();
 			}
 		}
+		// 接地したブロックについて
 		for (int i = 0; i < 10; ++i) {
 			for (int j = 0; j < 10; ++j) {
 				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive()) {
+					// ブロックを落下
 					boxInfo[i][j]->update(frameTime, boxInfo);
 					if (boxInfo[i][j]->getIsGrounded()) {
 						Box* tmp = boxInfo[i][j];
@@ -261,7 +263,7 @@ void CrushedBox::consoleCommand()
 		}
 		console->print(std::to_string(fallingBox->getCurrentFrame()));
 	}
-	if (command == "debug")
+	if (command == "boxInfo")
 	{
 		//check();
 		for (int j = 0; j < 10; ++j) {
@@ -273,6 +275,22 @@ void CrushedBox::consoleCommand()
 				}
 				else {
 					str += "0";
+				}
+			}
+			console->print(str);
+		}
+	}
+	if (command == "isGrounded")
+	{
+		for (int j = 0; j < 10; ++j) {
+			string str = "";
+			for (int i = 0; i < 10; ++i) {
+				str += ",";
+				if (boxInfo[i][j] != NULL) {
+					str += std::to_string(boxInfo[i][j]->getIsGrounded());
+				}
+				else {
+					str += "9";
 				}
 			}
 			console->print(str);
@@ -435,10 +453,13 @@ void CrushedBox::check() {
 		for (int i = 0; i < 10; ++i) {
 			if (boxInfo[i][j] != NULL) {
 				Box* box = boxInfo[i][j];	// 各ボックス
+				if (!box->getIsGrounded()) {
+					continue;
+				}
 				// 下
 				int newI = i;
 				int newJ = j + 1;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType() && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 下に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
 					// 下に存在するボックスのリストと結合
@@ -453,7 +474,7 @@ void CrushedBox::check() {
 				// 右
 				newI = i + 1;
 				newJ = j;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType() && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 右に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
 					// 右に存在するボックスのリストと結合
@@ -507,11 +528,11 @@ void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
 void CrushedBox::disappear(BoxSet& boxSet) {
 	// 各ボックスの情報を盤面情報から削除
 	for (int i = 0; i < boxSet.getBoxSize(); ++i) {
-		for (int j = 10 - 1; j > 10 - boxSet.getBox(i).getFieldY(); --j) {
-			if (boxInfo[boxSet.getBox(i).getFieldX()][j] != NULL) {
-				boxInfo[boxSet.getBox(i).getFieldX()][j]->setIsGrounded(false);
-			}
-		}
+//		for (int j = 10 - 1; j > 10 - boxSet.getBox(i).getFieldY(); --j) {
+//			if (boxInfo[boxSet.getBox(i).getFieldX()][j] != NULL) {
+//				boxInfo[boxSet.getBox(i).getFieldX()][j]->setIsGrounded(false);
+//			}
+//		}
 		safeDelete(boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()]);
 		boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()] = NULL;
 	}
