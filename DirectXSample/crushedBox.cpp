@@ -116,6 +116,7 @@ void CrushedBox::update()
 				fallingBox = &createNewBox();
 			}
 		}
+		checkClingingBox();
 		// 接地したブロックについて
 		for (int i = 0; i < 10; ++i) {
 			for (int j = 0; j < 10; ++j) {
@@ -210,8 +211,6 @@ void CrushedBox::render()
 		}
 	}
 
-	checkClingingBox();
-
 	if (menuOn)
 		menu.draw();
 	if (countDownOn)
@@ -264,6 +263,8 @@ void CrushedBox::consoleCommand()
 	}
 	if (command == "boxInfo")
 	{
+		int playerX = player.getFieldX();
+		int playerY = player.getFieldY();
 		//check();
 		for (int j = 0; j < 10; ++j) {
 			string str = "";
@@ -278,6 +279,7 @@ void CrushedBox::consoleCommand()
 			}
 			console->print(str);
 		}
+		console->print(std::to_string(playerX) + "," + std::to_string(playerY));
 	}
 	if (command == "isGrounded")
 	{
@@ -366,6 +368,15 @@ bool CrushedBox::checkClingingBox() {
 				clungingBoxList[i][j] = NULL;
 			}
 			damy[i][j] = clungingBoxList[i][j];
+		}
+	}
+	// 画面内のすべてのボックスについて、破壊されたボックスがあれば削除
+	for (int j = 0; j < 10; ++j) {
+		for (int i = 0; i < 10; ++i) {
+			if (boxInfo[i][j] != NULL && !boxInfo[i][j]->getActive()) {
+				BoxSet boxSet(*boxInfo[i][j]);
+				disappear(boxSet);
+			}
 		}
 	}
 	// 画面内のすべてのボックスについて、隣接する同色ボックス同士を結合

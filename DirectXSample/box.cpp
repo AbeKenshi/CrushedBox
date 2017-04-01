@@ -125,16 +125,9 @@ void Box::damage(WEAPON weapon)
 
 	switch (weapon)
 	{
-	case TORPEDO:
+	case PLAYER_ATTACK:
 		audio->playCue(TORPEDO_HIT);
-		health -= boxNS::TORPEDO_DAMAGE;
-		break;
-	case SHIP:
-		audio->playCue(COLLIDE);    // ƒTƒEƒ“ƒh‚ğÄ¶
-		health -= boxNS::SHIP_DAMAGE;
-		break;
-	case PLANET:
-		health = 0;
+		health -= boxNS::PLAYER_DAMEGE;
 		break;
 	}
 	if (health <= 0)

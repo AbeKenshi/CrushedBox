@@ -22,8 +22,7 @@ namespace boxNS
 	const int   EXPLOSION_START_FRAME = 32;		// 爆発の開始フレーム
 	const int   EXPLOSION_END_FRAME = 39;		// 爆発の終了フレーム
 	const float EXPLOSION_ANIMATION_DELAY = 0.2f;   // フレーム間の時間
-	const float TORPEDO_DAMAGE = 46;			// ミサイルによるダメージの大きさ
-	const float SHIP_DAMAGE = 10;				// 他の宇宙船との衝突によるダメージの大きさ
+	const int PLAYER_DAMEGE = 34;			// プレイヤーの攻撃によるダメージ 
 }
 
 // Entityクラスを継承
@@ -33,7 +32,7 @@ private:
 	float   oldX, oldY, oldAngle;
 	int		fieldX, fieldY;
 	float   rotation;               // 現在の回転の速さ（ラジアン/秒）
-    boxNS::DIRECTION direction;    // 回転の方向
+	boxNS::DIRECTION direction;    // 回転の方向
 	int		boxType;				// 箱の種類
 	float   explosionTimer;
 	bool    explosionOn;
@@ -64,16 +63,16 @@ public:
 
 	// 回転の力の方向
 	void rotate(boxNS::DIRECTION dir) { direction = dir; }
-	
+
 	// 宇宙船が爆発
 	void explode();
 
 	// 宇宙船を回復
 	void repair();
-	
+
 	// 接地中したかどうか
 	bool getIsGrounded() { return isGrounded; }
-	
+
 	// フィールド上のX座標を返す
 	int getFieldX() { return fieldX; }
 
@@ -91,7 +90,7 @@ public:
 	void setFieldY(int y) {
 		fieldY = y;
 	}
-	
+
 	// ボックスのタイプを返す
 	int getType() {
 		return boxType;

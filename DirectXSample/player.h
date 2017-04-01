@@ -17,6 +17,8 @@ namespace playerNS
 	const int PLAYER_START_FRAME = 5;
 	const int PLAYER_END_FRAME = 5;
 	const float PLAYER_ANIMATION_DELAY = 0.2f;	// フレーム間の時間
+	enum STATE { MOVE, ATTACK };				// 状態（移動中、行動中）
+	enum DIRECTION { LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3, NONE = 4 };	// プレイヤーの向き（上下左右）
 }
 
 // Entityクラスを継承
@@ -24,6 +26,9 @@ class Player : public Entity
 {
 private:
 	int fieldX, fieldY;
+	playerNS::STATE state;	// 状態（移動中、行動中）
+	playerNS::DIRECTION direction;	// プレイヤーの向き（上下左右）
+	float stateTimer;		// 状態遷移に用いるタイマー
 public:
 	// コンストラクタ
 	Player();
@@ -34,6 +39,12 @@ public:
 		TextureManager *textureM);
 	void update(float frameTime, Box* boxInfo[10][10]);
 	void damage(WEAPON);
+	int getFieldX() {
+		return fieldX;
+	}
+	int getFieldY() {
+		return fieldY;
+	}
 };
 
 #endif // !_PLAYER_H

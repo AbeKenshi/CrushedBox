@@ -48,26 +48,74 @@ void Player::draw()
 // 通常、フレームごとに1回呼び出す
 // frameTimeは、移動とアニメーションお速さを制御するために使用
 //=============================================================================
-void Player::update(float frameTime, Box* bofInfo[10][10])
+void Player::update(float frameTime, Box* boxInfo[10][10])
 {
 	Entity::update(frameTime);
 	// 上下左右キーが入力された場合、
 	// その方向に移動
 	velocity.x = 0;
 	velocity.y = 0;
-	if (input->isKeyDown(PLAYER_LEFT_KEY))
+	// ここで状態遷移、座標の移動を行う
+	// それぞれの状態ごとに処理を分岐
+	switch (state)
 	{
-		velocity.x = -playerNS::VELOCITY_X;
-	}
-	else if (input->isKeyDown(PLAYER_RIGHT_KEY))
-	{
-		velocity.x = playerNS::VELOCITY_X;
-	}
-	else if (input->isKeyDown(PLAYER_UP_KEY)) {
-		velocity.y = -playerNS::VELOCITY_Y;
-	}
-	else if (input->isKeyDown(PLAYER_DOWN_KEY)) {
-		velocity.y = playerNS::VELOCITY_Y;
+	case playerNS::MOVE:	// 移動時はすべてのキーの入力を受け付ける
+		// 上下左右キーが入力された場合、入力に応じてプレイヤーを移動
+		if (input->isKeyDown(PLAYER_LEFT_KEY))
+		{
+			direction = playerNS::LEFT;
+			velocity.x = -playerNS::VELOCITY_X;
+		}
+		else if (input->isKeyDown(PLAYER_RIGHT_KEY))
+		{
+			direction = playerNS::RIGHT;
+			velocity.x = playerNS::VELOCITY_X;
+		}
+		else if (input->isKeyDown(PLAYER_UP_KEY)) {
+			direction = playerNS::UP;
+			velocity.y = -playerNS::VELOCITY_Y;
+		}
+		else if (input->isKeyDown(PLAYER_DOWN_KEY)) {
+			direction = playerNS::DOWN;
+			velocity.y = playerNS::VELOCITY_Y;
+		}
+		// 攻撃キーが押された場合、
+		if (input->isKeyDown(PLAYER_ATTACK_KEY))
+		{
+			// 状態を攻撃中に遷移
+			state = playerNS::ATTACK;
+			// プレイヤーの向きの方向に存在するブロックを攻撃
+			int offsetX = 0, offsetY = 0;
+			switch (direction)
+			{
+			case playerNS::LEFT:
+				offsetX = -1;
+				break;
+			case playerNS::RIGHT:
+				offsetX = 1;
+				break;
+			case playerNS::UP:
+				offsetY = -1;
+				break;
+			case playerNS::DOWN:
+				offsetY = 1;
+				break;
+			}
+			if (boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL) {
+				boxInfo[fieldX + offsetX][fieldY + offsetY]->damage(PLAYER_ATTACK);
+			}
+			stateTimer = 0.5f;
+		}
+		break;
+	case playerNS::ATTACK:	// 攻撃中は一定時間経過するまで入力を受け付けない
+		// 一定時間経過したら、移動中に遷移
+		stateTimer -= frameTime;
+		if (stateTimer < 0.0f) {
+			state = playerNS::MOVE;
+		}
+		break;
+	default:
+		break;
 	}
 	spriteData.x += velocity.x * frameTime;
 	spriteData.y += velocity.y * frameTime;
@@ -98,7 +146,7 @@ void Player::update(float frameTime, Box* bofInfo[10][10])
 		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT;
 	}
 }
-	
+
 //=============================================================================
 // ダメージ
 //=============================================================================
