@@ -36,14 +36,32 @@ bool Player::initialize(Game *gamePtr, int width, int height, int ncols, Texture
 }
 
 //=============================================================================
+// プレイヤーの状態を初期化
+//=============================================================================
+void Player::init()
+{
+	spriteData.x = playerNS::X;
+	spriteData.y = playerNS::Y;
+	fieldX = spriteData.x / boxNS::WIDTH;
+	fieldY = spriteData.y / boxNS::HEIGHT;
+	spriteData.scale = 1.0;
+	velocity.x = 0;
+	velocity.y = 0;
+	active = true;
+	state = playerNS::MOVE;
+	direction = playerNS::NONE;
+}
+
+//=============================================================================
 // プレイヤーを描画 
 //=============================================================================
 void Player::draw()
 {
-	Image::draw();
+	if (active) {
+		Image::draw();
+	}
 }
 
-int signX, signY = 0;
 //=============================================================================
 // Update
 // 通常、フレームごとに1回呼び出す
@@ -90,6 +108,15 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 		{
 			// 状態を攻撃中に遷移
 			state = playerNS::ATTACK;
+			stateTimer = 0.3f;
+		}
+		break;
+	case playerNS::ATTACK:	// 攻撃中は一定時間経過するまで入力を受け付けない
+		// 一定時間経過したら、移動中に遷移
+		// その際、ブロックにダメージを与える
+		stateTimer -= frameTime;
+		if (stateTimer < 0.0f) {
+			state = playerNS::MOVE;
 			// プレイヤーの向きの方向に存在するブロックを攻撃
 			int offsetX = 0, offsetY = 0;
 			switch (direction)
@@ -110,15 +137,10 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			if (boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL) {
 				boxInfo[fieldX + offsetX][fieldY + offsetY]->damage(PLAYER_ATTACK);
 			}
-			stateTimer = 0.3f;
 		}
 		break;
-	case playerNS::ATTACK:	// 攻撃中は一定時間経過するまで入力を受け付けない
-		// 一定時間経過したら、移動中に遷移
-		stateTimer -= frameTime;
-		if (stateTimer < 0.0f) {
-			state = playerNS::MOVE;
-		}
+	case playerNS::CRUSH:	// ボックスと衝突時は、強制的に落下させられる
+		velocity.y = boxNS::VELOCITY_Y;
 		break;
 	default:
 		break;
@@ -142,7 +164,13 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 		spriteData.y = 0;
 	}
 	if (spriteData.y > GAME_HEIGHT - playerNS::HEIGHT) {
-		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT;
+		if (state == playerNS::CRUSH) {
+			//active = false;
+			spriteData.scale -= frameTime;
+			spriteData.x += (frameTime) / 2.0 * playerNS::WIDTH;
+			spriteData.y += (frameTime) * playerNS::HEIGHT;
+		}
+		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT * spriteData.scale;
 	}
 	// プレイヤーが一定以上移動したら、自分のフィールド上の座標をアップデート
 	if (spriteData.x >= (fieldX + 1) * boxNS::WIDTH) {
@@ -157,21 +185,27 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	if (spriteData.y <= (fieldY - 1) * boxNS::HEIGHT) {
 		fieldY -= 1;
 	}
-	
-	signX = (velocity.x > 0) - (velocity.x < 0);
-	signY = (velocity.y > 0) - (velocity.y < 0);
+
+	int signX = (velocity.x > 0) - (velocity.x < 0);
+	int signY = (velocity.y > 0) - (velocity.y < 0);
 	// 移動先にボックスが存在したら、移動前に座標を戻す
 	if (boxInfo[fieldX + signX][fieldY + signY] != NULL) {
 		spriteData.x = oldX;
 		spriteData.y = oldY;
 		fieldX = oldFieldX;
 		fieldY = oldFieldY;
+		if (state == playerNS::CRUSH) {
+			//active = false;
+			spriteData.scale -= frameTime;
+			spriteData.x += (frameTime) / 2.0 * playerNS::WIDTH;
+			spriteData.y += (frameTime) * playerNS::HEIGHT;
+		}
 	}
 	// 向きが変わっていた場合、プレイヤーの位置を修正
-	if (oldDirection != direction || direction == playerNS::NONE) {
+	if ((state != playerNS::CRUSH && (oldDirection != direction || direction == playerNS::NONE)) || state == playerNS::ATTACK) {
 		int rateX = spriteData.x / playerNS::WIDTH;
 		int rateY = spriteData.y / playerNS::HEIGHT;
-		if (spriteData.x - fieldX * playerNS::WIDTH >= playerNS::WIDTH / 2) 
+		if (spriteData.x - fieldX * playerNS::WIDTH >= playerNS::WIDTH / 2)
 		{
 			fieldX += 1;
 		}
@@ -189,6 +223,10 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 
 		spriteData.x = fieldX * playerNS::WIDTH;
 		spriteData.y = fieldY * playerNS::HEIGHT;
+	}
+	if (spriteData.scale < 0.0) {
+		active = false;
+		spriteData.scale = 0.0;
 	}
 }
 

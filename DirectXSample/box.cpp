@@ -128,6 +128,7 @@ void Box::damage(WEAPON weapon)
 	case PLAYER_ATTACK:
 		audio->playCue(TORPEDO_HIT);
 		health -= boxNS::PLAYER_DAMEGE;
+		spriteData.scale -= 0.2;
 		break;
 	}
 	if (health <= 0)

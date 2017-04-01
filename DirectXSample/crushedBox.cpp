@@ -106,10 +106,19 @@ void CrushedBox::update()
 		if (player.getActive()) {
 			player.update(frameTime, boxInfo);
 		}
+		else
+		{
+			roundOver = true;
+		}
 		if (fallingBox->getActive())
 		{
 			// 箱を落下
 			fallingBox->update(frameTime, boxInfo);
+			// プレイヤーと箱が接触していた場合、プレイヤーを挟む挙動に遷移 
+			if ((fallingBox->getX() - 0.2 <= player.getX() && fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY())
+			{
+				player.setState(playerNS::CRUSH);
+			}
 			// 落下していた箱が接地した場合、ステージ情報をアップデート
 			if (fallingBox->getIsGrounded()) {
 				boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
@@ -158,6 +167,7 @@ void CrushedBox::roundStart()
 //	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
 //	fallingBox->setDegrees(0);
 //	fallingBox->repair();
+	player.init();
 	countDownTimer = crusedBoxNS::COUNT_DOWN;
 	countDownOn = true;
 	roundOver = false;

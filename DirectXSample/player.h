@@ -17,7 +17,7 @@ namespace playerNS
 	const int PLAYER_START_FRAME = 5;
 	const int PLAYER_END_FRAME = 5;
 	const float PLAYER_ANIMATION_DELAY = 0.2f;	// フレーム間の時間
-	enum STATE { MOVE, ATTACK };				// 状態（移動中、行動中）
+	enum STATE { MOVE, ATTACK, CRUSH };				// 状態（移動中、行動中）
 	enum DIRECTION { LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3, NONE = 4 };	// プレイヤーの向き（上下左右）
 }
 
@@ -39,12 +39,18 @@ public:
 		TextureManager *textureM);
 	void update(float frameTime, Box* boxInfo[10][10]);
 	void damage(WEAPON);
+
+	// 新しいメンバー関数
 	int getFieldX() {
 		return fieldX;
 	}
 	int getFieldY() {
 		return fieldY;
 	}
+	void setState(playerNS::STATE st) {
+		state = st;
+	}
+	void init();
 };
 
 #endif // !_PLAYER_H
