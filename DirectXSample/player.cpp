@@ -58,6 +58,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	velocity.y = 0;
 	// ここで状態遷移、座標の移動を行う
 	// それぞれの状態ごとに処理を分岐
+	playerNS::DIRECTION oldDirection = direction;
 	switch (state)
 	{
 	case playerNS::MOVE:	// 移動時はすべてのキーの入力を受け付ける
@@ -80,11 +81,9 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			direction = playerNS::DOWN;
 			velocity.y = playerNS::VELOCITY_Y;
 		}
-		else {
-			int rateX = spriteData.x / playerNS::WIDTH;
-			int rateY = spriteData.y / playerNS::HEIGHT;
-			spriteData.x = (signX + fieldX + (int)(rateX - (int)(rateX) + 0.5)) * playerNS::WIDTH;
-			spriteData.y = (signY + fieldY + (int)(rateY - (int)(rateY) + 0.5)) * playerNS::HEIGHT;
+		else
+		{
+			direction = playerNS::NONE;
 		}
 		// 攻撃キーが押された場合、
 		if (input->isKeyDown(PLAYER_ATTACK_KEY))
@@ -124,10 +123,12 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	default:
 		break;
 	}
+	// 前の座標を保存
 	float oldX = spriteData.x;
 	float oldY = spriteData.y;
 	int oldFieldX = fieldX;
 	int oldFieldY = fieldY;
+	// 移動する場合は座標をアップデート
 	spriteData.x += velocity.x * frameTime;
 	spriteData.y += velocity.y * frameTime;
 	// 画面外に移動できないように移動範囲を制限
@@ -156,15 +157,38 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	if (spriteData.y <= (fieldY - 1) * boxNS::HEIGHT) {
 		fieldY -= 1;
 	}
+	
 	signX = (velocity.x > 0) - (velocity.x < 0);
 	signY = (velocity.y > 0) - (velocity.y < 0);
-
 	// 移動先にボックスが存在したら、移動前に座標を戻す
 	if (boxInfo[fieldX + signX][fieldY + signY] != NULL) {
 		spriteData.x = oldX;
 		spriteData.y = oldY;
 		fieldX = oldFieldX;
 		fieldY = oldFieldY;
+	}
+	// 向きが変わっていた場合、プレイヤーの位置を修正
+	if (oldDirection != direction || direction == playerNS::NONE) {
+		int rateX = spriteData.x / playerNS::WIDTH;
+		int rateY = spriteData.y / playerNS::HEIGHT;
+		if (spriteData.x - fieldX * playerNS::WIDTH >= playerNS::WIDTH / 2) 
+		{
+			fieldX += 1;
+		}
+		else if (spriteData.x - fieldX * playerNS::WIDTH <= -playerNS::WIDTH / 2)
+		{
+			fieldX -= 1;
+		}
+		if (spriteData.y - fieldY * playerNS::HEIGHT >= playerNS::HEIGHT / 2) {
+			fieldY += 1;
+		}
+		else if (spriteData.y - fieldY * playerNS::HEIGHT <= -playerNS::HEIGHT / 2)
+		{
+			fieldY -= 1;
+		}
+
+		spriteData.x = fieldX * playerNS::WIDTH;
+		spriteData.y = fieldY * playerNS::HEIGHT;
 	}
 }
 

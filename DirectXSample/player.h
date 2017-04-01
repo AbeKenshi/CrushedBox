@@ -11,8 +11,8 @@ namespace playerNS
 	const int HEIGHT = 48;						// 画像の高さ
 	const int X = 0;							// 画面上の位置
 	const int Y = 7 * boxNS::HEIGHT;
-	const float VELOCITY_X = 200.0f;			// X軸方向の速度
-	const float VELOCITY_Y = 200.0f;			// Y軸方向の速度
+	const float VELOCITY_X = 300.0f;			// X軸方向の速度
+	const float VELOCITY_Y = 300.0f;			// Y軸方向の速度
 	const int TEXTURE_COLS = 4;					// テクスチャは8列
 	const int PLAYER_START_FRAME = 5;
 	const int PLAYER_END_FRAME = 5;
