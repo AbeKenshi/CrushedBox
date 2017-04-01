@@ -43,6 +43,7 @@ void Player::draw()
 	Image::draw();
 }
 
+int signX, signY = 0;
 //=============================================================================
 // Update
 // 通常、フレームごとに1回呼び出す
@@ -79,6 +80,12 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			direction = playerNS::DOWN;
 			velocity.y = playerNS::VELOCITY_Y;
 		}
+		else {
+			int rateX = spriteData.x / playerNS::WIDTH;
+			int rateY = spriteData.y / playerNS::HEIGHT;
+			spriteData.x = (signX + fieldX + (int)(rateX - (int)(rateX) + 0.5)) * playerNS::WIDTH;
+			spriteData.y = (signY + fieldY + (int)(rateY - (int)(rateY) + 0.5)) * playerNS::HEIGHT;
+		}
 		// 攻撃キーが押された場合、
 		if (input->isKeyDown(PLAYER_ATTACK_KEY))
 		{
@@ -104,7 +111,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			if (boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL) {
 				boxInfo[fieldX + offsetX][fieldY + offsetY]->damage(PLAYER_ATTACK);
 			}
-			stateTimer = 0.5f;
+			stateTimer = 0.3f;
 		}
 		break;
 	case playerNS::ATTACK:	// 攻撃中は一定時間経過するまで入力を受け付けない
@@ -117,8 +124,25 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	default:
 		break;
 	}
+	float oldX = spriteData.x;
+	float oldY = spriteData.y;
+	int oldFieldX = fieldX;
+	int oldFieldY = fieldY;
 	spriteData.x += velocity.x * frameTime;
 	spriteData.y += velocity.y * frameTime;
+	// 画面外に移動できないように移動範囲を制限
+	if (spriteData.x > GAME_WIDTH - playerNS::WIDTH) {
+		spriteData.x = GAME_WIDTH - playerNS::WIDTH;
+	}
+	if (spriteData.x < 0) {
+		spriteData.x = 0;
+	}
+	if (spriteData.y < 0) {
+		spriteData.y = 0;
+	}
+	if (spriteData.y > GAME_HEIGHT - playerNS::HEIGHT) {
+		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT;
+	}
 	// プレイヤーが一定以上移動したら、自分のフィールド上の座標をアップデート
 	if (spriteData.x >= (fieldX + 1) * boxNS::WIDTH) {
 		fieldX += 1;
@@ -132,18 +156,15 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	if (spriteData.y <= (fieldY - 1) * boxNS::HEIGHT) {
 		fieldY -= 1;
 	}
-	// 移動範囲を制限
-	if (spriteData.x > GAME_WIDTH - playerNS::WIDTH) {
-		spriteData.x = GAME_WIDTH - playerNS::WIDTH;
-	}
-	if (spriteData.x < 0) {
-		spriteData.x = 0;
-	}
-	if (spriteData.y < 0) {
-		spriteData.y = 0;
-	}
-	if (spriteData.y > GAME_HEIGHT - playerNS::HEIGHT) {
-		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT;
+	signX = (velocity.x > 0) - (velocity.x < 0);
+	signY = (velocity.y > 0) - (velocity.y < 0);
+
+	// 移動先にボックスが存在したら、移動前に座標を戻す
+	if (boxInfo[fieldX + signX][fieldY + signY] != NULL) {
+		spriteData.x = oldX;
+		spriteData.y = oldY;
+		fieldX = oldFieldX;
+		fieldY = oldFieldY;
 	}
 }
 
