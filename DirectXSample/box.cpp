@@ -31,6 +31,7 @@ Box::Box() : Entity()
 	direction = boxNS::NONE;                   // 回転の力の方向
 	explosionOn = false;
 	isGrounded = false;
+	isPushed = 0;
 }
 
 //=============================================================================
@@ -81,18 +82,30 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 		}
 	}
 
-	velocity.y = (float)boxNS::VELOCITY_Y;
-
+	velocity.y = 0.0f;
+	velocity.x = 0.0f;
+	// プッシュされている状態であればx方向に移動
+	if (fieldX + 1 < GAME_WIDTH / boxNS::WIDTH && fieldX > 0) {
+		velocity.x = (float)boxNS::VELOCITY_Y * isPushed;
+	}
+	else
+	{
+		isPushed = 0;
+		distanceWhenPushed = 0.0f;
+	}
+	// 落下先が画面外or固定ボックスでなければ落下
+	if (!isGrounded)
+	{
+		velocity.y = (float)boxNS::VELOCITY_Y;
+	}
 
 	Entity::update(frameTime);
 	oldX = spriteData.x;                        // 現在の位置を保存
 	oldY = spriteData.y;
 	oldAngle = spriteData.angle;
-	
-	// 落下先が画面外or固定ボックスがあったら落下できない
-	if (!isGrounded) {
-		spriteData.y += frameTime * velocity.y;
-	}
+
+	// 画面外or固定ボックスと上から接触したら
+	// 状態を接地中に遷移
 	if (fieldY + 1 >= GAME_HEIGHT / boxNS::HEIGHT || (boxInfo[fieldX][fieldY + 1] != NULL && boxInfo[fieldX][fieldY + 1]->getIsGrounded())) {
 		isGrounded = true;
 	}
@@ -100,12 +113,28 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 		isGrounded = false;
 	}
 
-	// 箱が一定以上落下したら
+	spriteData.x += frameTime * velocity.x;
+	distanceWhenPushed += abs(spriteData.x - oldX);
+	if (distanceWhenPushed >= boxNS::WIDTH) {
+		isPushed = 0;
+		distanceWhenPushed = 0.0f;
+	}
+	spriteData.y += frameTime * velocity.y;
+
+	// 箱が一定以上移動したら
+	// 箱のフィールド上の座標をアップデート
+	// ずれが生じないように念のため位置を修正
 	if (spriteData.y >= (fieldY + 1) * boxNS::HEIGHT) {
-		// 箱のフィールド上の座標をアップデート
 		fieldY += 1;
-		// ずれが生じないように念のため位置を修正
 		spriteData.y = (fieldY)* boxNS::HEIGHT;
+	}
+	if (spriteData.x >= (fieldX + 1) * boxNS::WIDTH) {
+		fieldX += 1;
+		spriteData.x = (fieldX)* boxNS::WIDTH;
+	}
+	if (spriteData.x <= (fieldX - 1) * boxNS::WIDTH) {
+		fieldX -= 1;
+		spriteData.x = (fieldX)* boxNS::WIDTH;
 	}
 
 	// 画面の端で回り込む

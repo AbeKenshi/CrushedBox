@@ -110,6 +110,13 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			state = playerNS::ATTACK;
 			stateTimer = 0.3f;
 		}
+		// ボックスプッシュキーが押された場合、
+		if (input->isKeyDown(PLAYER_PUSH_KEY))
+		{
+			// 状態をプッシュ中に遷移
+			state = playerNS::PUSH;
+			stateTimer = 0.3f;
+		}
 		break;
 	case playerNS::ATTACK:	// 攻撃中は一定時間経過するまで入力を受け付けない
 		// 一定時間経過したら、移動中に遷移
@@ -139,6 +146,28 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			}
 		}
 		break;
+	case playerNS::PUSH:	// ボックスプッシュ中は一定時間経過するまで入力を受け付けない
+		// 一定時間経過したら、移動中に遷移
+		stateTimer -= frameTime;
+		if (stateTimer < 0.0f)
+		{
+			state = playerNS::MOVE;
+			// プレイヤーの向きの方向に存在するブロックをプッシュ
+			int offsetX = 0;
+			switch (direction)
+			{
+			case playerNS::LEFT:
+				offsetX = -1;
+				break;
+			case playerNS::RIGHT:
+				offsetX = 1;
+				break;
+			}
+			if (boxInfo[fieldX + offsetX][fieldY] != NULL)
+			{
+				boxInfo[fieldX + offsetX][fieldY]->pushed(offsetX);
+			}
+		}
 	case playerNS::CRUSH:	// ボックスと衝突時は、強制的に落下させられる
 		velocity.y = boxNS::VELOCITY_Y;
 		break;
@@ -202,7 +231,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 		}
 	}
 	// 向きが変わっていた場合、プレイヤーの位置を修正
-	if ((state != playerNS::CRUSH && (oldDirection != direction || direction == playerNS::NONE)) || state == playerNS::ATTACK) {
+	if ((state != playerNS::CRUSH && (oldDirection != direction || direction == playerNS::NONE)) || state == playerNS::ATTACK || state == playerNS::PUSH) {
 		int rateX = spriteData.x / playerNS::WIDTH;
 		int rateY = spriteData.y / playerNS::HEIGHT;
 		if (spriteData.x - fieldX * playerNS::WIDTH >= playerNS::WIDTH / 2)

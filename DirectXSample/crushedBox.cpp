@@ -130,7 +130,7 @@ void CrushedBox::update()
 		for (int i = 0; i < 10; ++i) {
 			for (int j = 0; j < 10; ++j) {
 				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive()) {
-					// ブロックを落下
+					// 移動しているブロックがあれば、フィールド情報をアップデート
 					boxInfo[i][j]->update(frameTime, boxInfo);
 					if (boxInfo[i][j]->getIsGrounded()) {
 						Box* tmp = boxInfo[i][j];

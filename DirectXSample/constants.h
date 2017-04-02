@@ -63,6 +63,7 @@ const UCHAR PLAYER_RIGHT_KEY = VK_RIGHT;
 const UCHAR PLAYER_UP_KEY = VK_UP;
 const UCHAR PLAYER_DOWN_KEY = VK_DOWN;
 const UCHAR PLAYER_ATTACK_KEY = 'A';
+const UCHAR PLAYER_PUSH_KEY = 'F';
 
 									  // weapon types
 enum WEAPON { PLAYER_ATTACK, BOX};

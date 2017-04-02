@@ -38,6 +38,8 @@ private:
 	bool    explosionOn;
 	Image   explosion;
 	bool	isGrounded;				// 接地して落下ができない状態かどうか
+	int		isPushed;				// プッシュされている状態かどうか
+	float	distanceWhenPushed;		// プッシュされている間に進んだ距離カウンタ
 public:
 	// コンストラクタ
 	Box();
@@ -94,6 +96,11 @@ public:
 	// ボックスのタイプを返す
 	int getType() {
 		return boxType;
+	}
+
+	// プッシュされている状態にする
+	void pushed(int direction) {
+		isPushed = direction;
 	}
 };
 #endif
