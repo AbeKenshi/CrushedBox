@@ -163,7 +163,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 				offsetX = 1;
 				break;
 			}
-			if (boxInfo[fieldX + offsetX][fieldY] != NULL)
+			if (boxInfo[fieldX + offsetX][fieldY] != NULL && boxInfo[fieldX + 2 * offsetX][fieldY] == NULL)
 			{
 				boxInfo[fieldX + offsetX][fieldY]->pushed(offsetX);
 			}
