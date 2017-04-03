@@ -84,6 +84,7 @@ public:
 
 	// 新しいボックスオブジェクトを作成
 	Box& createNewBox();
+	Box& createNewBox(int bt);
 	// ボックスの削除判定
 	bool checkClingingBox();
 	// ２つのボックスセットを結合させる

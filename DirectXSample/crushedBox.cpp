@@ -170,6 +170,23 @@ void CrushedBox::roundStart()
 //	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
 //	fallingBox->setDegrees(0);
 //	fallingBox->repair();
+	// 固定された箱のメモリを解放
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			if (boxInfo[i][j] != NULL) {
+				safeDelete(boxInfo[i][j]);
+			}
+		}
+	}
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 10; ++i) {
+			boxInfo[i][10 - 1 - j] = &createNewBox((i + j) % 4 + 4);
+			boxInfo[i][10 - 1 - j]->setX(i * boxNS::WIDTH);
+			boxInfo[i][10 - 1 - j]->setY((10 - 1 - j) * boxNS::HEIGHT);
+			boxInfo[i][10 - 1 - j]->setFieldX(i);
+			boxInfo[i][10 - 1 - j]->setFieldY(10 - 1 - j);
+		}
+	}
 	player.init();
 	countDownTimer = crusedBoxNS::COUNT_DOWN;
 	countDownOn = true;
@@ -364,6 +381,24 @@ Box& CrushedBox::createNewBox()
 }
 
 //=============================================================================
+// 新しいBoxオブジェクトを作るメソッド。
+//=============================================================================
+Box& CrushedBox::createNewBox(int bt)
+{
+	Box* newBox = new Box(bt);
+	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
+	// 色指定
+	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
+	// 箱の初期位置指定
+	newBox->setX((rand() % 10) * boxNS::WIDTH);
+	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
+	newBox->setY(0);
+	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
+	return *newBox;
+}
+
+//=============================================================================
 // ボックスの削除判定
 //=============================================================================
 bool CrushedBox::checkClingingBox() {
@@ -400,7 +435,7 @@ bool CrushedBox::checkClingingBox() {
 											// 下
 				int newI = i;
 				int newJ = j + 1;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4) {
 					// 下に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
 					// 下に存在するボックスのリストと結合
@@ -414,7 +449,7 @@ bool CrushedBox::checkClingingBox() {
 				// 右
 				newI = i + 1;
 				newJ = j;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType()) {
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4) {
 					// 右に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
 					// 右に存在するボックスのリストと結合
@@ -482,7 +517,7 @@ void CrushedBox::check() {
 				// 下
 				int newI = i;
 				int newJ = j + 1;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType() && boxInfo[newI][newJ]->getIsGrounded()) {
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 下に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
 					// 下に存在するボックスのリストと結合
@@ -497,7 +532,7 @@ void CrushedBox::check() {
 				// 右
 				newI = i + 1;
 				newJ = j;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() == boxInfo[newI][newJ]->getType() && boxInfo[newI][newJ]->getIsGrounded()) {
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 右に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
 					// 右に存在するボックスのリストと結合

@@ -21,7 +21,7 @@ Box::Box() : Entity()
 	velocity.y = 0;
 	frameDelay = boxNS::BOX_ANIMATION_DELAY;
 	// 宇宙船アニメーションの最初のフレーム
-	startFrame = rand() % (boxNS::BOX_END_FRAME + 1);
+	startFrame = rand() % 4;
 	// 宇宙船アニメーションの最後のフレーム
 	endFrame = startFrame;
 	boxType = startFrame;
@@ -32,6 +32,18 @@ Box::Box() : Entity()
 	explosionOn = false;
 	isGrounded = false;
 	isPushed = 0;
+}
+
+//=============================================================================
+// デフォルトコンストラクタ
+//=============================================================================
+Box::Box(int bt) : Entity()
+{
+	Box();
+	boxType = bt;
+	startFrame = bt;
+	endFrame = bt;
+	currentFrame = bt;
 }
 
 //=============================================================================
@@ -156,12 +168,12 @@ void Box::damage(WEAPON weapon)
 	{
 	case PLAYER_ATTACK:
 		audio->playCue(TORPEDO_HIT);
-		if (boxType != 3)
+		if (boxType < 3)
 		{
 			health -= 100.0f;
 			spriteData.scale -= 0.6;
 		}
-		else
+		else if (boxType == 3)
 		{
 			health -= boxNS::PLAYER_DAMEGE;
 			spriteData.scale -= 0.2;

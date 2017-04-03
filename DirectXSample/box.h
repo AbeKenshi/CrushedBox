@@ -17,7 +17,7 @@ namespace boxNS
 	const int   TEXTURE_COLS = 4;				// テクスチャは8列
 	const int   BOX_START_FRAME = 0;			// 宇宙船1はフレーム0から開始
 	// 宇宙船1のアニメーションフレームは0、1、2、3
-	const int   BOX_END_FRAME = 3;
+	const int   BOX_END_FRAME = 7;
 	const float BOX_ANIMATION_DELAY = 0.2f;    // フレーム間の時間
 	const int   EXPLOSION_START_FRAME = 32;		// 爆発の開始フレーム
 	const int   EXPLOSION_END_FRAME = 39;		// 爆発の終了フレーム
@@ -43,6 +43,7 @@ private:
 public:
 	// コンストラクタ
 	Box();
+	Box(int bt);
 
 	// 継承されたメンバー関数
 	virtual void draw();
