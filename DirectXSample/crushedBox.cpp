@@ -53,12 +53,15 @@ void CrushedBox::initialize(HWND hwnd)
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing menu texture"));
 
 	// 星雲のテクスチャ
-	if (!nebulaTexture.initialize(graphics, NEBULA_IMAGE))
+	if (!nebulaTexture.initialize(graphics, BACKGROUND_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula texture"));
 
-	// メインのゲームテクスチャ
-	if (!gameTextures.initialize(graphics, TEXTURES_IMAGE))
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing game textures"));
+	// ボックスのテクスチャ
+	if (!boxTextures.initialize(graphics, BOX_TEXTURES_IMAGE))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box textures"));
+	// プレイヤーのテクスチャ 
+	if (!playerTextures.initialize(graphics, TEXTURES_IMAGE))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player textures"));
 
 	// メニューの画像
 	if (!menu.initialize(graphics, 0, 0, 0, &menuTexture))
@@ -72,11 +75,11 @@ void CrushedBox::initialize(HWND hwnd)
 	fallingBox = &(createNewBox());
 
 	// プレイヤー
-	if (!player.initialize(this, playerNS::WIDTH, playerNS::HEIGHT, playerNS::TEXTURE_COLS, &gameTextures))
+	if (!player.initialize(this, playerNS::WIDTH, playerNS::HEIGHT, playerNS::TEXTURE_COLS, &playerTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player"));
 
 	// 体力バー
-	healthBar.initialize(graphics, &gameTextures, 0, crusedBoxNS::HEALTHBAR_Y, 2.0f, graphicsNS::WHITE);
+	healthBar.initialize(graphics, &playerTextures, 0, crusedBoxNS::HEALTHBAR_Y, 2.0f, graphicsNS::WHITE);
 
 	return;
 }
@@ -318,7 +321,7 @@ void CrushedBox::releaseAll()
 {
 	menuTexture.onLostDevice();
 	nebulaTexture.onLostDevice();
-	gameTextures.onLostDevice();
+	playerTextures.onLostDevice();
 	fontScore.onLostDevice();
 	fontBig.onLostDevice();
 
@@ -334,7 +337,7 @@ void CrushedBox::resetAll()
 {
 	fontBig.onResetDevice();
 	fontScore.onResetDevice();
-	gameTextures.onResetDevice();
+	playerTextures.onResetDevice();
 	nebulaTexture.onResetDevice();
 	menuTexture.onResetDevice();
 
@@ -348,7 +351,7 @@ void CrushedBox::resetAll()
 Box& CrushedBox::createNewBox()
 {
 	Box* newBox = new Box();
-	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &gameTextures))
+	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// 色指定
 	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));

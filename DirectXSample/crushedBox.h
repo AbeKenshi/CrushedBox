@@ -44,7 +44,8 @@ private:
 	// ゲームアイテム
 	TextureManager menuTexture;		// タイトルのテクスチャ
 	TextureManager nebulaTexture;	// 星雲（nebula）のテクスチャ
-	TextureManager gameTextures;	// ゲームに使用するテクスチャ群
+	TextureManager boxTextures;		// ボックスのテクスチャ
+	TextureManager playerTextures;	// ゲームに使用するテクスチャ群
 	Player player;					// プレイヤーが操作するオブジェクト
 	Box* fallingBox;				// 落下中の箱
 	Box* boxInfo[10][10];			// ステージ上に固定された箱情報

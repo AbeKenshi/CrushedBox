@@ -29,9 +29,10 @@ const float MAX_FRAME_TIME = 1.0f / MIN_FRAME_RATE; // maximum time used in calc
 const float FULL_HEALTH = 100;
 
 // graphic images
-const char NEBULA_IMAGE[] = "pictures\\orion.jpg";     // photo source NASA/courtesy of nasaimages.org 
-const char TEXTURES_IMAGE[] = "pictures\\puyo.png";  // game textures
-const char MENU_IMAGE[] = "pictures\\menu.png";      // menu texture
+const char BACKGROUND_IMAGE[] = "pictures\\background.png";		// photo source NASA/courtesy of nasaimages.org 
+const char BOX_TEXTURES_IMAGE[] = "pictures\\box.png";	// ボックスのテクスチャ
+const char TEXTURES_IMAGE[] = "pictures\\puyo.png";		// game textures
+const char MENU_IMAGE[] = "pictures\\menu.png";			// menu texture
 const char DASHBOARD_TEXTURES[] = "pictures\\dashboard.png";
 
 // audio files required by audio.cpp
