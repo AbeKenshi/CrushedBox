@@ -149,6 +149,12 @@ void CrushedBox::update()
 				}
 			}
 		}
+		for (int i = 0; i < 10; ++i) {
+			if (boxInfo[i][2] != NULL) {
+				roundOver = true;
+				break;
+			}
+		}
 		if (roundOver)
 		{
 			roundTimer -= frameTime;
