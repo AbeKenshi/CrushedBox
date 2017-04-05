@@ -102,10 +102,6 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	}
 	else
 	{
-		if (isPushed) {
-			safeDelete(boxInfo[fieldX + 1][fieldY]);
-			boxInfo[fieldX + 1][fieldY] = NULL;
-		}
 		isPushed = 0;
 		distanceWhenPushed = 0.0f;
 	}
@@ -132,6 +128,8 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	spriteData.x += frameTime * velocity.x;
 	distanceWhenPushed += abs(spriteData.x - oldX);
 	if (distanceWhenPushed >= boxNS::WIDTH) {
+		safeDelete(boxInfo[fieldX + 1][fieldY]);
+		boxInfo[fieldX + 1][fieldY] = NULL;
 		isPushed = 0;
 		distanceWhenPushed = 0.0f;
 	}
