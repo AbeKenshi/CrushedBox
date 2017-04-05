@@ -153,7 +153,7 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 		fieldX -= 1;
 		spriteData.x = (fieldX)* boxNS::WIDTH;
 	}
-	if (isGrounded && !isPushed) {
+	if (isGrounded && isPushed == 0) {
 		spriteData.x = (fieldX)* boxNS::WIDTH;
 		spriteData.y = (fieldY)* boxNS::HEIGHT;
 	}

@@ -132,7 +132,7 @@ void CrushedBox::update()
 		// 接地したブロックについて
 		for (int i = 0; i < 10; ++i) {
 			for (int j = 0; j < 10; ++j) {
-				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive()) {
+				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive() && boxInfo[i][j]->getType() < 8) {
 					// 移動しているブロックがあれば、フィールド情報をアップデート
 					boxInfo[i][j]->update(frameTime, boxInfo);
 					if (boxInfo[i][j]->getIsGrounded()) {
@@ -241,7 +241,7 @@ void CrushedBox::render()
 
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
-			if (boxInfo[i][j] != NULL) {
+			if (boxInfo[i][j] != NULL && boxInfo[i][j]->getType() < 8) {
 				boxInfo[i][j]->draw();
 			}
 		}
@@ -592,6 +592,7 @@ void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
 //=============================================================================
 void CrushedBox::disappear(BoxSet& boxSet) {
 	// 各ボックスの情報を盤面情報から削除
+	gameScore += 100 + 50 * (boxSet.getBoxSize() - 3);
 	for (int i = 0; i < boxSet.getBoxSize(); ++i) {
 		safeDelete(boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()]);
 		boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()] = NULL;
