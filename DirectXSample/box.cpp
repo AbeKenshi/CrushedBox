@@ -102,6 +102,10 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	}
 	else
 	{
+		if (isPushed) {
+			safeDelete(boxInfo[fieldX + 1][fieldY]);
+			boxInfo[fieldX + 1][fieldY] = NULL;
+		}
 		isPushed = 0;
 		distanceWhenPushed = 0.0f;
 	}

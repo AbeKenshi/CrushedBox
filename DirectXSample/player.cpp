@@ -166,6 +166,12 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			if (boxInfo[fieldX + offsetX][fieldY] != NULL && boxInfo[fieldX + 2 * offsetX][fieldY] == NULL)
 			{
 				boxInfo[fieldX + offsetX][fieldY]->pushed(offsetX);
+				// ダミーをボックスを生成、移動先に他のブロックが降ってこないようにする
+				boxInfo[fieldX + 2 * offsetX][fieldY] = new Box(8);
+				boxInfo[fieldX + 2 * offsetX][fieldY]->setX((fieldX + 2 * offsetX) * boxNS::WIDTH);
+				boxInfo[fieldX + 2 * offsetX][fieldY]->setY(fieldY * boxNS::HEIGHT);
+				boxInfo[fieldX + 2 * offsetX][fieldY]->setFieldX(fieldX + 2 * offsetX);
+				boxInfo[fieldX + 2 * offsetX][fieldY]->setFieldY(fieldY);
 			}
 		}
 	case playerNS::CRUSH:	// ボックスと衝突時は、強制的に落下させられる
