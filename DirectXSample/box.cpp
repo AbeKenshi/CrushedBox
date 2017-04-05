@@ -44,6 +44,9 @@ Box::Box(int bt) : Entity()
 	startFrame = bt;
 	endFrame = bt;
 	currentFrame = bt;
+	if (bt >= 8) {
+		isGrounded = true;
+	}
 }
 
 //=============================================================================
@@ -149,6 +152,10 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	if (spriteData.x <= (fieldX - 1) * boxNS::WIDTH) {
 		fieldX -= 1;
 		spriteData.x = (fieldX)* boxNS::WIDTH;
+	}
+	if (isGrounded && !isPushed) {
+		spriteData.x = (fieldX)* boxNS::WIDTH;
+		spriteData.y = (fieldY)* boxNS::HEIGHT;
 	}
 
 	// ‰æ–Ê‚Ì’[‚Å‰ñ‚èž‚Þ

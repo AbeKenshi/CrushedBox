@@ -14,7 +14,7 @@ CrushedBox::CrushedBox()
 	menuOn = true;
 	countDownOn = false;
 	roundOver = false;
-	boxScore = 0;
+	gameScore = 0;
 	boxScored = false;
 	initialized = false;
 }
@@ -225,7 +225,7 @@ void CrushedBox::render()
 
 	// スコアを表示
 	fontScore.setFontColor(crusedBoxNS::SHIP1_COLOR);
-	_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)boxScore);
+	_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)gameScore);
 	fontScore.print(buffer, crusedBoxNS::SCORE1_X, crusedBoxNS::SCORE_Y);
 
 	// 体力バーを表示
@@ -428,8 +428,9 @@ bool CrushedBox::checkClingingBox() {
 	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 10; ++i) {
 			if (boxInfo[i][j] != NULL && !boxInfo[i][j]->getActive()) {
-				BoxSet boxSet(*boxInfo[i][j]);
-				disappear(boxSet);
+				safeDelete(boxInfo[i][j]);
+				boxInfo[i][j] = NULL;
+				gameScore += 1;
 			}
 		}
 	}

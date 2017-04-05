@@ -225,7 +225,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	// 移動先にボックスが存在したら、移動前に座標を戻す
 	if (boxInfo[fieldX + signX][fieldY + signY] != NULL || 
 		(boxInfo[fieldX + signX][fieldY + signY - 1] != NULL && 
-		boxInfo[fieldX + signX][fieldY + signY - 1]->getX() == boxInfo[fieldX + signX][fieldY + signY - 1]->getFieldX() * boxNS::HEIGHT)) {
+			!boxInfo[fieldX + signX][fieldY + signY - 1]->getIsGrounded()))
+	{
 		spriteData.x = oldX;
 		spriteData.y = oldY;
 		fieldX = oldFieldX;

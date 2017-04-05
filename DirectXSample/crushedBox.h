@@ -62,7 +62,7 @@ private:
 	bool    boxScored;
 	bool    roundOver;				// ラウンドが終了した場合、true
 	float   roundTimer;				// 新しいラウンドが開始するまでの時間
-	int     boxScore; // スコア
+	int     gameScore; // スコア
 
 public:
 	// コンストラクタ
