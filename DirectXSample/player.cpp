@@ -223,9 +223,11 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	int signX = (velocity.x > 0) - (velocity.x < 0);
 	int signY = (velocity.y > 0) - (velocity.y < 0);
 	// 移動先にボックスが存在したら、移動前に座標を戻す
-	if (boxInfo[fieldX + signX][fieldY + signY] != NULL || 
+	if (fieldX + signX > 0 && fieldX + signX < GAME_WIDTH / boxNS::WIDTH &&
+		fieldY + signY > 0 && fieldY + signY < GAME_HEIGHT / boxNS::HEIGHT && 
+		(boxInfo[fieldX + signX][fieldY + signY] != NULL || 
 		(boxInfo[fieldX + signX][fieldY + signY - 1] != NULL && 
-			!boxInfo[fieldX + signX][fieldY + signY - 1]->getIsGrounded()))
+			!boxInfo[fieldX + signX][fieldY + signY - 1]->getIsGrounded())))
 	{
 		spriteData.x = oldX;
 		spriteData.y = oldY;
