@@ -118,7 +118,9 @@ void CrushedBox::update()
 			// 箱を落下
 			fallingBox->update(frameTime, boxInfo);
 			// プレイヤーと箱が接触していた場合、プレイヤーを挟む挙動に遷移 
-			if ((fallingBox->getX() - 0.2 <= player.getX() && fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY())
+			if ((fallingBox->getX() - 0.2 <= player.getX() && 
+				fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY() &&
+				fallingBox->getY() <= player.getY())
 			{
 				player.setState(playerNS::CRUSH);
 			}
