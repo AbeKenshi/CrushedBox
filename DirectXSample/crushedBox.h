@@ -63,6 +63,7 @@ private:
 	bool    roundOver;				// ラウンドが終了した場合、true
 	float   roundTimer;				// 新しいラウンドが開始するまでの時間
 	int     gameScore; // スコア
+	bool	destroyDefaultBox;		// ステージ開始時に最初から存在していたブロックをすべて削除したかどうか
 
 public:
 	// コンストラクタ

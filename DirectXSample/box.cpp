@@ -177,7 +177,7 @@ void Box::damage(WEAPON weapon)
 	switch (weapon)
 	{
 	case PLAYER_ATTACK:
-		audio->playCue(TORPEDO_HIT);
+		//audio->playCue(TORPEDO_HIT);
 		if (boxType < 3)
 		{
 			health -= 100.0f;
