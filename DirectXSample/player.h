@@ -13,9 +13,9 @@ namespace playerNS
 	const int Y = 7 * boxNS::HEIGHT;
 	const float VELOCITY_X = 300.0f;			// X軸方向の速度
 	const float VELOCITY_Y = 300.0f;			// Y軸方向の速度
-	const int TEXTURE_COLS = 4;					// テクスチャは8列
-	const int PLAYER_START_FRAME = 5;
-	const int PLAYER_END_FRAME = 5;
+	const int TEXTURE_COLS = 1;					// テクスチャは8列
+	const int PLAYER_START_FRAME = 0;
+	const int PLAYER_END_FRAME = 0;
 	const float PLAYER_ANIMATION_DELAY = 0.2f;	// フレーム間の時間
 	enum STATE { MOVE, ATTACK, PUSH, CRUSH };				// 状態（移動中、行動中）
 	enum DIRECTION { LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3, NONE = 4 };	// プレイヤーの向き（上下左右）
