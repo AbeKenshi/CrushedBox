@@ -176,6 +176,13 @@ void CrushedBox::update()
 			if (roundTimer <= 0)
 				roundStart();
 		}
+		else
+		{
+			if (chainCount > 0)
+			{
+				chainTimer += frameTime;
+			}
+		}
 	}
 
 }
@@ -459,7 +466,7 @@ bool CrushedBox::checkClingingBox() {
 											// 下
 				int newI = i;
 				int newJ = j + 1;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 && 
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
 					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 下に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
@@ -474,7 +481,7 @@ bool CrushedBox::checkClingingBox() {
 				// 右
 				newI = i + 1;
 				newJ = j;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 && 
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
 					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 右に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
@@ -543,7 +550,7 @@ void CrushedBox::check() {
 				// 下
 				int newI = i;
 				int newJ = j + 1;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 && 
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
 					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 下に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
@@ -559,7 +566,7 @@ void CrushedBox::check() {
 				// 右
 				newI = i + 1;
 				newJ = j;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 && 
+				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
 					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 右に存在するボックスと色が同じなら、結合
 					int len = clungingBoxList[newI][newJ]->getBoxSize();
@@ -612,10 +619,19 @@ void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
 // ボックスセットを削除する
 //=============================================================================
 void CrushedBox::disappear(BoxSet& boxSet) {
+	if (chainCount > 0 && chainTimer < 0.5f)
+	{
+		chainCount += 1;
+	}
+	else
+	{
+		chainCount = 1;
+	}
 	// 各ボックスの情報を盤面情報から削除
-	gameScore += 100 + 50 * (boxSet.getBoxSize() - 3);
+	gameScore += chainCount * (100 + 50 * (boxSet.getBoxSize() - 3));
 	for (int i = 0; i < boxSet.getBoxSize(); ++i) {
 		safeDelete(boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()]);
 		boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()] = NULL;
 	}
+	chainTimer = 0.0f;
 }

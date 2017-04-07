@@ -62,8 +62,10 @@ private:
 	bool    boxScored;
 	bool    roundOver;				// ラウンドが終了した場合、true
 	float   roundTimer;				// 新しいラウンドが開始するまでの時間
-	int     gameScore; // スコア
+	int     gameScore;				// スコア
 	bool	destroyDefaultBox;		// ステージ開始時に最初から存在していたブロックをすべて削除したかどうか
+	float	chainTimer;				// 連鎖判定に用いるカウンタ（一定時間以内にブロックを消し続けた場合、連鎖になる）
+	int		chainCount;				// 連鎖数
 
 public:
 	// コンストラクタ
