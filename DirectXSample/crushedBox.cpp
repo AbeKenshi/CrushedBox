@@ -619,7 +619,7 @@ void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
 // ボックスセットを削除する
 //=============================================================================
 void CrushedBox::disappear(BoxSet& boxSet) {
-	if (chainCount > 0 && chainTimer < 0.5f)
+	if (chainCount > 0 && chainTimer < 0.25f)
 	{
 		chainCount += 1;
 	}

@@ -140,7 +140,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 				offsetY = 1;
 				break;
 			}
-			if (boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL) {
+			if (boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL && boxInfo[fieldX + offsetX][fieldY + offsetY]->getType() < 8) {
 				boxInfo[fieldX + offsetX][fieldY + offsetY]->damage(PLAYER_ATTACK);
 			}
 		}
