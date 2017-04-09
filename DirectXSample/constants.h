@@ -33,6 +33,7 @@ const char BACKGROUND_IMAGE[] = "pictures\\background.png";		// photo source NAS
 const char BOX_TEXTURES_IMAGE[] = "pictures\\box.png";	// ボックスのテクスチャ
 const char TEXTURES_IMAGE[] = "pictures\\player.png";		// game textures
 const char MENU_IMAGE[] = "pictures\\menu.png";			// menu texture
+const char GAMEOVER_IMAGE[] = "pictures\\gameover.png";	// gameover texture
 const char DASHBOARD_TEXTURES[] = "pictures\\dashboard.png";
 
 // audio files required by audio.cpp

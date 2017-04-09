@@ -11,9 +11,8 @@ CrushedBox::CrushedBox()
 			boxInfo[i][j] = NULL;
 		}
 	}
-	menuOn = true;
+	state = crusedBoxNS::MENU;
 	countDownOn = false;
-	roundOver = false;
 	gameScore = 0;
 	boxScored = false;
 	initialized = false;
@@ -52,13 +51,18 @@ void CrushedBox::initialize(HWND hwnd)
 	if (!menuTexture.initialize(graphics, MENU_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing menu texture"));
 
-	// 星雲のテクスチャ
-	if (!nebulaTexture.initialize(graphics, BACKGROUND_IMAGE))
+	// ゲーム終了時に表示するテクスチャ
+	if (!gameoverTexture.initialize(graphics, GAMEOVER_IMAGE))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing gameover texture"));
+
+	// 背景のテクスチャ
+	if (!backgroundTexture.initialize(graphics, BACKGROUND_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula texture"));
 
 	// ボックスのテクスチャ
 	if (!boxTextures.initialize(graphics, BOX_TEXTURES_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box textures"));
+
 	// プレイヤーのテクスチャ 
 	if (!playerTextures.initialize(graphics, TEXTURES_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player textures"));
@@ -66,9 +70,13 @@ void CrushedBox::initialize(HWND hwnd)
 	// メニューの画像
 	if (!menu.initialize(graphics, 0, 0, 0, &menuTexture))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing menu"));
+	
+	// ゲーム終了時の画像
+	if (!gameover.initialize(graphics, 0, 0, 0, &gameoverTexture))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing gameover"));
 
-	// 星雲の画像
-	if (!nebula.initialize(graphics, 0, 0, 0, &nebulaTexture))
+	// 背景の画像
+	if (!background.initialize(graphics, 0, 0, 0, &backgroundTexture))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula"));
 
 	// 箱
@@ -89,11 +97,10 @@ void CrushedBox::initialize(HWND hwnd)
 //=============================================================================
 void CrushedBox::update()
 {
-	if (menuOn)
+	if (state == crusedBoxNS::MENU)
 	{
 		if (input->anyKeyPressed())
 		{
-			menuOn = false;
 			input->clearAll();
 			roundStart();
 		}
@@ -106,12 +113,13 @@ void CrushedBox::update()
 	}
 	else
 	{
+		// プレイヤーが死んでいたら、ゲーム終了
 		if (player.getActive()) {
 			player.update(frameTime, boxInfo);
 		}
 		else
 		{
-			roundOver = true;
+			state = crusedBoxNS::FINISHED;
 		}
 		if (fallingBox->getActive())
 		{
@@ -144,6 +152,7 @@ void CrushedBox::update()
 						if (x != i || y != j) {
 							boxInfo[x][y] = tmp;
 							boxInfo[i][j] = NULL;
+							state = crusedBoxNS::ROUND;
 						}
 						// boxInfo[boxInfo[i][j]->getFieldX()][boxInfo[i][j]->getFieldY()] = boxInfo[i][j];
 						// boxInfo[i][j] = NULL;
@@ -164,17 +173,25 @@ void CrushedBox::update()
 			destroyDefaultBox = true;
 			gameScore += 8000;
 		}
+		// 一定以上ブロックが積み重なっていれば、ゲーム終了
 		for (int i = 0; i < 10; ++i) {
 			if (boxInfo[i][2] != NULL) {
-				roundOver = true;
+				state = crusedBoxNS::FINISHED;
 				break;
 			}
 		}
-		if (roundOver)
+		if (state == crusedBoxNS::FINISHED)
 		{
-			roundTimer -= frameTime;
-			if (roundTimer <= 0)
+			if (input->isKeyDown(VK_ESCAPE))
+			{
+				input->clearAll();
+				exitGame();
+			}
+			else if (input->anyKeyPressed())
+			{
+				input->clearAll();
 				roundStart();
+			}
 		}
 		else
 		{
@@ -198,6 +215,8 @@ void CrushedBox::roundStart()
 //	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
 //	fallingBox->setDegrees(0);
 //	fallingBox->repair();
+	// ゲーム状態をプレイ中に遷移
+	state = crusedBoxNS::ROUND;
 	// 固定された箱のメモリを解放
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
@@ -218,7 +237,6 @@ void CrushedBox::roundStart()
 	player.init();
 	countDownTimer = crusedBoxNS::COUNT_DOWN;
 	countDownOn = true;
-	roundOver = false;
 	boxScored = false;
 	gameScore = 0;
 	destroyDefaultBox = false;
@@ -245,38 +263,48 @@ void CrushedBox::render()
 {
 	graphics->spriteBegin();	// スプライトの描画を開始
 
-	nebula.draw();				// オリオン星雲をシーンに追加
+	// ゲーム状態に応じて、描画する画像を変更
+	switch (state)
+	{
+	case crusedBoxNS::MENU:
+		menu.draw();
+		break;
+	case crusedBoxNS::ROUND:
+		background.draw();				// オリオン星雲をシーンに追加
 
-	// スコアを表示
-	fontScore.setFontColor(crusedBoxNS::SHIP1_COLOR);
-	_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)gameScore);
-	fontScore.print(buffer, crusedBoxNS::SCORE1_X, crusedBoxNS::SCORE_Y);
+		// スコアを表示
+		fontScore.setFontColor(crusedBoxNS::SHIP1_COLOR);
+		_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)gameScore);
+		fontScore.print(buffer, crusedBoxNS::SCORE1_X, crusedBoxNS::SCORE_Y);
 
-	// 体力バーを表示
-	healthBar.setX((float)crusedBoxNS::SHIP1_HEALTHBAR_X);
-	healthBar.set(fallingBox->getHealth());
-	healthBar.draw(crusedBoxNS::SHIP1_COLOR);
+		// 体力バーを表示
+		healthBar.setX((float)crusedBoxNS::SHIP1_HEALTHBAR_X);
+		healthBar.set(fallingBox->getHealth());
+		healthBar.draw(crusedBoxNS::SHIP1_COLOR);
 
-	// プレイヤーを描画
-	player.draw();
+		// プレイヤーを描画
+		player.draw();
 
-	// 箱を描画
-	fallingBox->draw();
+		// 箱を描画
+		fallingBox->draw();
 
-	for (int i = 0; i < 10; ++i) {
-		for (int j = 0; j < 10; ++j) {
-			if (boxInfo[i][j] != NULL && boxInfo[i][j]->getType() < 8) {
-				boxInfo[i][j]->draw();
+		for (int i = 0; i < 10; ++i) {
+			for (int j = 0; j < 10; ++j) {
+				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getType() < 8) {
+					boxInfo[i][j]->draw();
+				}
 			}
 		}
-	}
 
-	if (menuOn)
-		menu.draw();
-	if (countDownOn)
-	{
-		_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)(ceil(countDownTimer)));
-		fontBig.print(buffer, crusedBoxNS::COUNT_DOWN_X, crusedBoxNS::COUNT_DOWN_Y);
+		if (countDownOn)
+		{
+			_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)(ceil(countDownTimer)));
+			fontBig.print(buffer, crusedBoxNS::COUNT_DOWN_X, crusedBoxNS::COUNT_DOWN_Y);
+		}
+		break;
+	case crusedBoxNS::FINISHED:
+		gameover.draw();
+		break;
 	}
 
 	graphics->spriteEnd();		// スプライトの描画を終了
@@ -367,7 +395,9 @@ void CrushedBox::consoleCommand()
 void CrushedBox::releaseAll()
 {
 	menuTexture.onLostDevice();
-	nebulaTexture.onLostDevice();
+	gameoverTexture.onLostDevice();
+	backgroundTexture.onLostDevice();
+	boxTextures.onLostDevice();
 	playerTextures.onLostDevice();
 	fontScore.onLostDevice();
 	fontBig.onLostDevice();
@@ -385,7 +415,9 @@ void CrushedBox::resetAll()
 	fontBig.onResetDevice();
 	fontScore.onResetDevice();
 	playerTextures.onResetDevice();
-	nebulaTexture.onResetDevice();
+	boxTextures.onResetDevice();
+	backgroundTexture.onResetDevice();
+	gameoverTexture.onResetDevice();
 	menuTexture.onResetDevice();
 
 	Game::resetAll();

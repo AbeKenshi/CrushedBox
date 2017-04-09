@@ -33,6 +33,7 @@ namespace crusedBoxNS
 	const int COUNT_DOWN = 5;           // 5からカウントダウン
 	const int BUF_SIZE = 20;
 	const int ROUND_TIME = 5;           // 新しいラウンドが開始するまでの時間
+	enum STATE { MENU = 0, ROUND = 1, FINISHED = 2};	// ゲームの状態（メニュー画面、プレイ中、終了画面）
 }
 
 //=============================================================================
@@ -43,25 +44,25 @@ class CrushedBox : public Game
 private:
 	// ゲームアイテム
 	TextureManager menuTexture;		// タイトルのテクスチャ
-	TextureManager nebulaTexture;	// 星雲（nebula）のテクスチャ
+	TextureManager gameoverTexture;	// ゲーム終了時に表示するテクスチャ
+	TextureManager backgroundTexture;	// 背景のテクスチャ
 	TextureManager boxTextures;		// ボックスのテクスチャ
 	TextureManager playerTextures;	// ゲームに使用するテクスチャ群
 	Player player;					// プレイヤーが操作するオブジェクト
 	Box* fallingBox;				// 落下中の箱
 	Box* boxInfo[10][10];			// ステージ上に固定された箱情報
-	Image nebula;					// 星雲（nebula）の画像
+	Image background;				// 背景の画像
 	Image   menu;					// メニューの画像
+	Image	gameover;				// ゲーム終了時に表示する画像
 	Bar     healthBar;				// 宇宙船の体力バー
 	TextDX  fontBig;				// ゲームバナーのDirectXフォント
 	TextDX  fontScore;
-	bool    menuOn;
+	crusedBoxNS::STATE state;		// ゲームの状態（メニュー画面、プレイ中、終了画面）
 	bool    countDownOn;			// カウントダウンが表示されている場合、true
 	float   countDownTimer;
 	char buffer[crusedBoxNS::BUF_SIZE];
 	// ラウンド中で宇宙船のスコアが計算される場合、true
 	bool    boxScored;
-	bool    roundOver;				// ラウンドが終了した場合、true
-	float   roundTimer;				// 新しいラウンドが開始するまでの時間
 	int     gameScore;				// スコア
 	bool	destroyDefaultBox;		// ステージ開始時に最初から存在していたブロックをすべて削除したかどうか
 	float	chainTimer;				// 連鎖判定に用いるカウンタ（一定時間以内にブロックを消し続けた場合、連鎖になる）
