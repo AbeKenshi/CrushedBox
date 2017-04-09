@@ -194,8 +194,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	if (spriteData.x < 0) {
 		spriteData.x = 0;
 	}
-	if (spriteData.y < 0) {
-		spriteData.y = 0;
+	if (spriteData.y < boxNS::HEIGHT * 3) {
+		spriteData.y = boxNS::HEIGHT * 3;
 	}
 	if (spriteData.y > GAME_HEIGHT - playerNS::HEIGHT) {
 		if (state == playerNS::CRUSH) {

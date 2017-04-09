@@ -14,24 +14,22 @@
 
 using namespace std;
 
-namespace crusedBoxNS
+namespace crushedBoxNS
 {
 	const char FONT[] = "Arial Bold";	// フォント
 	const int FONT_BIG_SIZE = 256;		// フォントの高さ
-	const int FONT_SCORE_SIZE = 48;
+	const int FONT_DEFAULT_SIZE = 36;
 	const COLOR_ARGB FONT_COLOR = graphicsNS::YELLOW;
-	const COLOR_ARGB SHIP1_COLOR = graphicsNS::BLUE;
-	const COLOR_ARGB SHIP2_COLOR = graphicsNS::YELLOW;
+	const COLOR_ARGB FONT_SCORE_COLOR = graphicsNS::BLUE;
 	const int SCORE_Y = 10;
-	const int SCORE1_X = 60;
-	const int SCORE2_X = GAME_WIDTH - 80;
-	const int HEALTHBAR_Y = 30;
-	const int SHIP1_HEALTHBAR_X = 40;
-	const int SHIP2_HEALTHBAR_X = GAME_WIDTH - 100;
+	const int SCORE_X = 10;
+	const int TIME_LIMIT_X = GAME_WIDTH / 2 + 50;
+	const int TIME_LIMIT_Y = SCORE_Y;
 	const int COUNT_DOWN_X = GAME_WIDTH / 2 - FONT_BIG_SIZE / 4;
 	const int COUNT_DOWN_Y = GAME_HEIGHT / 2 - FONT_BIG_SIZE / 2;
 	const int COUNT_DOWN = 5;           // 5からカウントダウン
-	const int BUF_SIZE = 20;
+	const int TIME_LIMIT = 90;			// 制限時間は90秒
+	const int BUF_SIZE = 40;
 	const int ROUND_TIME = 5;           // 新しいラウンドが開始するまでの時間
 	enum STATE { MENU = 0, ROUND = 1, FINISHED = 2};	// ゲームの状態（メニュー画面、プレイ中、終了画面）
 }
@@ -54,13 +52,14 @@ private:
 	Image background;				// 背景の画像
 	Image   menu;					// メニューの画像
 	Image	gameover;				// ゲーム終了時に表示する画像
-	Bar     healthBar;				// 宇宙船の体力バー
 	TextDX  fontBig;				// ゲームバナーのDirectXフォント
-	TextDX  fontScore;
-	crusedBoxNS::STATE state;		// ゲームの状態（メニュー画面、プレイ中、終了画面）
+	TextDX  fontScore;				// スコア表示用のDirectXフォント
+	TextDX	fontTimeLimit;			// 残り時間表示用のDirectXフォント
+	crushedBoxNS::STATE state;		// ゲームの状態（メニュー画面、プレイ中、終了画面）
 	bool    countDownOn;			// カウントダウンが表示されている場合、true
 	float   countDownTimer;
-	char buffer[crusedBoxNS::BUF_SIZE];
+	float	limitTimer;				// ゲーム中の残り制限時間
+	char buffer[crushedBoxNS::BUF_SIZE];
 	// ラウンド中で宇宙船のスコアが計算される場合、true
 	bool    boxScored;
 	int     gameScore;				// スコア

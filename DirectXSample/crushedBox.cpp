@@ -11,7 +11,7 @@ CrushedBox::CrushedBox()
 			boxInfo[i][j] = NULL;
 		}
 	}
-	state = crusedBoxNS::MENU;
+	state = crushedBoxNS::MENU;
 	countDownOn = false;
 	gameScore = 0;
 	boxScored = false;
@@ -43,9 +43,11 @@ void CrushedBox::initialize(HWND hwnd)
 	Game::initialize(hwnd); // GameErrorをスロー
 
 	// DirectXフォントを初期化
-	fontBig.initialize(graphics, crusedBoxNS::FONT_BIG_SIZE, false, false, crusedBoxNS::FONT);
-	fontBig.setFontColor(crusedBoxNS::FONT_COLOR);
-	fontScore.initialize(graphics, crusedBoxNS::FONT_SCORE_SIZE, false, false, crusedBoxNS::FONT);
+	fontBig.initialize(graphics, crushedBoxNS::FONT_BIG_SIZE, false, false, crushedBoxNS::FONT);
+	fontBig.setFontColor(crushedBoxNS::FONT_COLOR);
+	fontScore.initialize(graphics, crushedBoxNS::FONT_DEFAULT_SIZE, false, false, crushedBoxNS::FONT);
+	fontTimeLimit.initialize(graphics, crushedBoxNS::FONT_DEFAULT_SIZE, false, false, crushedBoxNS::FONT);
+	fontTimeLimit.setFontColor(crushedBoxNS::FONT_COLOR);
 
 	// メニューのテクスチャ
 	if (!menuTexture.initialize(graphics, MENU_IMAGE))
@@ -79,15 +81,9 @@ void CrushedBox::initialize(HWND hwnd)
 	if (!background.initialize(graphics, 0, 0, 0, &backgroundTexture))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula"));
 
-	// 箱
-	fallingBox = &(createNewBox());
-
 	// プレイヤー
 	if (!player.initialize(this, playerNS::WIDTH, playerNS::HEIGHT, playerNS::TEXTURE_COLS, &playerTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player"));
-
-	// 体力バー
-	healthBar.initialize(graphics, &playerTextures, 0, crusedBoxNS::HEALTHBAR_Y, 2.0f, graphicsNS::WHITE);
 
 	return;
 }
@@ -97,7 +93,7 @@ void CrushedBox::initialize(HWND hwnd)
 //=============================================================================
 void CrushedBox::update()
 {
-	if (state == crusedBoxNS::MENU)
+	if (state == crushedBoxNS::MENU)
 	{
 		if (input->anyKeyPressed())
 		{
@@ -113,74 +109,86 @@ void CrushedBox::update()
 	}
 	else
 	{
-		// プレイヤーが死んでいたら、ゲーム終了
-		if (player.getActive()) {
-			player.update(frameTime, boxInfo);
-		}
-		else
+		if (state == crushedBoxNS::ROUND)
 		{
-			state = crusedBoxNS::FINISHED;
-		}
-		if (fallingBox->getActive())
-		{
-			// 箱を落下
-			fallingBox->update(frameTime, boxInfo);
-			// プレイヤーと箱が接触していた場合、プレイヤーを挟む挙動に遷移 
-			if ((fallingBox->getX() - 0.2 <= player.getX() && 
-				fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY() &&
-				fallingBox->getY() <= player.getY())
+			// プレイヤーが死んでいたら、ゲーム終了
+			if (player.getActive()) {
+				player.update(frameTime, boxInfo);
+			}
+			else
 			{
-				player.setState(playerNS::CRUSH);
+				state = crushedBoxNS::FINISHED;
 			}
-			// 落下していた箱が接地した場合、ステージ情報をアップデート
-			if (fallingBox->getIsGrounded()) {
-				boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
-				fallingBox = &createNewBox();
+			if (fallingBox->getActive())
+			{
+				// 箱を落下
+				fallingBox->update(frameTime, boxInfo);
+				// プレイヤーと箱が接触していた場合、プレイヤーを挟む挙動に遷移 
+				if ((fallingBox->getX() - 0.2 <= player.getX() &&
+					fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY() &&
+					fallingBox->getY() <= player.getY())
+				{
+					player.setState(playerNS::CRUSH);
+				}
+				// 落下していた箱が接地した場合、ステージ情報をアップデート
+				if (fallingBox->getIsGrounded()) {
+					boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
+					fallingBox = &createNewBox();
+				}
 			}
-		}
-		checkClingingBox();
-		// 接地したブロックについて
-		for (int i = 0; i < 10; ++i) {
-			for (int j = 0; j < 10; ++j) {
-				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive() && boxInfo[i][j]->getType() < 8) {
-					// 移動しているブロックがあれば、フィールド情報をアップデート
-					boxInfo[i][j]->update(frameTime, boxInfo);
-					if (boxInfo[i][j]->getIsGrounded()) {
-						Box* tmp = boxInfo[i][j];
-						int x = boxInfo[i][j]->getFieldX();
-						int y = boxInfo[i][j]->getFieldY();
-						if (x != i || y != j) {
-							boxInfo[x][y] = tmp;
-							boxInfo[i][j] = NULL;
-							state = crusedBoxNS::ROUND;
+			checkClingingBox();
+			// 接地したブロックについて
+			for (int i = 0; i < 10; ++i) {
+				for (int j = 0; j < 10; ++j) {
+					if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive() && boxInfo[i][j]->getType() < 8) {
+						// 移動しているブロックがあれば、フィールド情報をアップデート
+						boxInfo[i][j]->update(frameTime, boxInfo);
+						if (boxInfo[i][j]->getIsGrounded()) {
+							Box* tmp = boxInfo[i][j];
+							int x = boxInfo[i][j]->getFieldX();
+							int y = boxInfo[i][j]->getFieldY();
+							if (x != i || y != j) {
+								boxInfo[x][y] = tmp;
+								boxInfo[i][j] = NULL;
+								state = crushedBoxNS::ROUND;
+							}
+							// boxInfo[boxInfo[i][j]->getFieldX()][boxInfo[i][j]->getFieldY()] = boxInfo[i][j];
+							// boxInfo[i][j] = NULL;
 						}
-						// boxInfo[boxInfo[i][j]->getFieldX()][boxInfo[i][j]->getFieldY()] = boxInfo[i][j];
-						// boxInfo[i][j] = NULL;
 					}
 				}
 			}
-		}
-		// すべての×ブロックが破壊されていれば、ボーナスポイント
-		int cnt = 0;
-		for (int j = 0; j < 2; ++j) {
-			for (int i = 0; i < 10; ++i) {
-				if (boxInfo[i][10 - 1 - j] != NULL && boxInfo[i][10 - 1 - j]->getType() < 8 && boxInfo[i][10 - 1 - j]->getType() > 3) {
-					cnt += 1;
+			// すべての×ブロックが破壊されていれば、ボーナスポイント
+			int cnt = 0;
+			for (int j = 0; j < 2; ++j) {
+				for (int i = 0; i < 10; ++i) {
+					if (boxInfo[i][10 - 1 - j] != NULL && boxInfo[i][10 - 1 - j]->getType() < 8 && boxInfo[i][10 - 1 - j]->getType() > 3) {
+						cnt += 1;
+					}
 				}
 			}
-		}
-		if (!destroyDefaultBox && cnt == 0) {
-			destroyDefaultBox = true;
-			gameScore += 8000;
-		}
-		// 一定以上ブロックが積み重なっていれば、ゲーム終了
-		for (int i = 0; i < 10; ++i) {
-			if (boxInfo[i][2] != NULL) {
-				state = crusedBoxNS::FINISHED;
-				break;
+			if (!destroyDefaultBox && cnt == 0) {
+				destroyDefaultBox = true;
+				gameScore += 8000;
+			}
+			// 一定以上ブロックが積み重なっていれば、ゲーム終了
+			for (int i = 0; i < 10; ++i) {
+				if (boxInfo[i][2] != NULL) {
+					state = crushedBoxNS::FINISHED;
+					break;
+				}
+			}
+			limitTimer -= frameTime;
+			if (limitTimer < 0.0f)
+			{
+				state = crushedBoxNS::FINISHED;
+			}
+			if (chainCount > 0)
+			{
+				chainTimer += frameTime;
 			}
 		}
-		if (state == crusedBoxNS::FINISHED)
+		else
 		{
 			if (input->isKeyDown(VK_ESCAPE))
 			{
@@ -191,13 +199,6 @@ void CrushedBox::update()
 			{
 				input->clearAll();
 				roundStart();
-			}
-		}
-		else
-		{
-			if (chainCount > 0)
-			{
-				chainTimer += frameTime;
 			}
 		}
 	}
@@ -215,8 +216,13 @@ void CrushedBox::roundStart()
 //	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
 //	fallingBox->setDegrees(0);
 //	fallingBox->repair();
+	if (state == crushedBoxNS::FINISHED)
+	{
+		safeDelete(fallingBox);
+		fallingBox = NULL;
+	}
 	// ゲーム状態をプレイ中に遷移
-	state = crusedBoxNS::ROUND;
+	state = crushedBoxNS::ROUND;
 	// 固定された箱のメモリを解放
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
@@ -234,8 +240,10 @@ void CrushedBox::roundStart()
 			boxInfo[i][10 - 1 - j]->setFieldY(10 - 1 - j);
 		}
 	}
+	fallingBox = &(createNewBox());
 	player.init();
-	countDownTimer = crusedBoxNS::COUNT_DOWN;
+	countDownTimer = crushedBoxNS::COUNT_DOWN;
+	limitTimer = crushedBoxNS::TIME_LIMIT;
 	countDownOn = true;
 	boxScored = false;
 	gameScore = 0;
@@ -263,24 +271,26 @@ void CrushedBox::render()
 {
 	graphics->spriteBegin();	// スプライトの描画を開始
 
+	string str;
 	// ゲーム状態に応じて、描画する画像を変更
 	switch (state)
 	{
-	case crusedBoxNS::MENU:
+	case crushedBoxNS::MENU:
 		menu.draw();
 		break;
-	case crusedBoxNS::ROUND:
+	case crushedBoxNS::ROUND:
 		background.draw();				// オリオン星雲をシーンに追加
 
 		// スコアを表示
-		fontScore.setFontColor(crusedBoxNS::SHIP1_COLOR);
-		_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)gameScore);
-		fontScore.print(buffer, crusedBoxNS::SCORE1_X, crusedBoxNS::SCORE_Y);
+		fontScore.setFontColor(crushedBoxNS::FONT_SCORE_COLOR);
+		str = "SCORE : " + to_string(gameScore);
+		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
+		fontScore.print(buffer, crushedBoxNS::SCORE_X, crushedBoxNS::SCORE_Y);
 
-		// 体力バーを表示
-		healthBar.setX((float)crusedBoxNS::SHIP1_HEALTHBAR_X);
-		healthBar.set(fallingBox->getHealth());
-		healthBar.draw(crusedBoxNS::SHIP1_COLOR);
+		// 残り時間を表示
+		str = "TIME : " + to_string(int(limitTimer));
+		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
+		fontTimeLimit.print(buffer, crushedBoxNS::TIME_LIMIT_X, crushedBoxNS::TIME_LIMIT_Y);
 
 		// プレイヤーを描画
 		player.draw();
@@ -298,12 +308,15 @@ void CrushedBox::render()
 
 		if (countDownOn)
 		{
-			_snprintf_s(buffer, crusedBoxNS::BUF_SIZE, "%d", (int)(ceil(countDownTimer)));
-			fontBig.print(buffer, crusedBoxNS::COUNT_DOWN_X, crusedBoxNS::COUNT_DOWN_Y);
+			_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%d", (int)(ceil(countDownTimer)));
+			fontBig.print(buffer, crushedBoxNS::COUNT_DOWN_X, crushedBoxNS::COUNT_DOWN_Y);
 		}
 		break;
-	case crusedBoxNS::FINISHED:
+	case crushedBoxNS::FINISHED:
 		gameover.draw();
+		str = "YOUR SCORE IS : " + to_string(int(gameScore));
+		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
+		fontScore.print(buffer, 80, 320);
 		break;
 	}
 
@@ -399,6 +412,7 @@ void CrushedBox::releaseAll()
 	backgroundTexture.onLostDevice();
 	boxTextures.onLostDevice();
 	playerTextures.onLostDevice();
+	fontTimeLimit.onLostDevice();
 	fontScore.onLostDevice();
 	fontBig.onLostDevice();
 
@@ -414,6 +428,7 @@ void CrushedBox::resetAll()
 {
 	fontBig.onResetDevice();
 	fontScore.onResetDevice();
+	fontTimeLimit.onLostDevice();
 	playerTextures.onResetDevice();
 	boxTextures.onResetDevice();
 	backgroundTexture.onResetDevice();
@@ -437,7 +452,7 @@ Box& CrushedBox::createNewBox()
 	// 箱の初期位置指定
 	newBox->setX((rand() % 10) * boxNS::WIDTH);
 	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
-	newBox->setY(0);
+	newBox->setY(boxNS::HEIGHT);
 	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
@@ -455,7 +470,7 @@ Box& CrushedBox::createNewBox(int bt)
 	// 箱の初期位置指定
 	newBox->setX((rand() % 10) * boxNS::WIDTH);
 	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
-	newBox->setY(0);
+	newBox->setY(boxNS::HEIGHT);
 	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
