@@ -11,8 +11,8 @@ Box::Box() : Entity()
 	spriteData.y = boxNS::Y;
 	spriteData.rect.bottom = boxNS::HEIGHT;    // ‰æ–Ê‚Ìˆê•”‚ð‘I‘ð
 	spriteData.rect.right = boxNS::WIDTH;
-	fieldX = spriteData.x / boxNS::WIDTH;
-	fieldY = spriteData.y / boxNS::HEIGHT;
+	fieldX = (int) spriteData.x / boxNS::WIDTH;
+	fieldY = (int) spriteData.y / boxNS::HEIGHT;
 	oldX = boxNS::X;
 	oldY = boxNS::Y;
 	oldAngle = 0.0f;
@@ -144,19 +144,19 @@ void Box::update(float frameTime, Box* boxInfo[10][10])
 	// ‚¸‚ê‚ª¶‚¶‚È‚¢‚æ‚¤‚É”O‚Ì‚½‚ßˆÊ’u‚ðC³
 	if (spriteData.y >= (fieldY + 1) * boxNS::HEIGHT) {
 		fieldY += 1;
-		spriteData.y = (fieldY)* boxNS::HEIGHT;
+		spriteData.y = (float) fieldY * boxNS::HEIGHT;
 	}
 	if (spriteData.x >= (fieldX + 1) * boxNS::WIDTH) {
 		fieldX += 1;
-		spriteData.x = (fieldX)* boxNS::WIDTH;
+		spriteData.x = (float) fieldX * boxNS::WIDTH;
 	}
 	if (spriteData.x <= (fieldX - 1) * boxNS::WIDTH) {
 		fieldX -= 1;
-		spriteData.x = (fieldX)* boxNS::WIDTH;
+		spriteData.x = (float) fieldX * boxNS::WIDTH;
 	}
 	if (isGrounded && isPushed == 0) {
-		spriteData.x = (fieldX)* boxNS::WIDTH;
-		spriteData.y = (fieldY)* boxNS::HEIGHT;
+		spriteData.x = (float) fieldX * boxNS::WIDTH;
+		spriteData.y = (float) fieldY * boxNS::HEIGHT;
 	}
 
 	// ‰æ–Ê‚Ì’[‚Å‰ñ‚èž‚Þ
@@ -181,12 +181,12 @@ void Box::damage(WEAPON weapon)
 		if (boxType < 3)
 		{
 			health -= 100.0f;
-			spriteData.scale -= 0.6;
+			spriteData.scale -= 0.6f;
 		}
 		else if (boxType == 3)
 		{
 			health -= boxNS::PLAYER_DAMEGE;
-			spriteData.scale -= 0.2;
+			spriteData.scale -= 0.2f;
 		}
 		break;
 	}

@@ -11,8 +11,8 @@ Player::Player() : Entity()
 	spriteData.y = playerNS::Y;
 	spriteData.rect.bottom = playerNS::HEIGHT;    // 画面の一部を選択
 	spriteData.rect.right = playerNS::WIDTH;
-	fieldX = spriteData.x / boxNS::WIDTH;
-	fieldY = spriteData.y / boxNS::HEIGHT;
+	fieldX = (int) spriteData.x / boxNS::WIDTH;
+	fieldY = (int) spriteData.y / boxNS::HEIGHT;
 	velocity.x = 0;								// 速度X
 	velocity.y = 0;
 	frameDelay = playerNS::PLAYER_ANIMATION_DELAY;
@@ -41,8 +41,8 @@ void Player::init()
 {
 	spriteData.x = playerNS::X;
 	spriteData.y = playerNS::Y;
-	fieldX = spriteData.x / boxNS::WIDTH;
-	fieldY = spriteData.y / boxNS::HEIGHT;
+	fieldX = (int) spriteData.x / boxNS::WIDTH;
+	fieldY = (int) spriteData.y / boxNS::HEIGHT;
 	spriteData.scale = 1.0;
 	velocity.x = 0;
 	velocity.y = 0;
@@ -167,8 +167,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 				boxInfo[fieldX + offsetX][fieldY]->pushed(offsetX);
 				// ダミーをボックスを生成、移動先に他のブロックが降ってこないようにする
 				boxInfo[fieldX + 2 * offsetX][fieldY] = new Box(8);
-				boxInfo[fieldX + 2 * offsetX][fieldY]->setX((fieldX + 2 * offsetX) * boxNS::WIDTH);
-				boxInfo[fieldX + 2 * offsetX][fieldY]->setY(fieldY * boxNS::HEIGHT);
+				boxInfo[fieldX + 2 * offsetX][fieldY]->setX((float) (fieldX + 2 * offsetX) * boxNS::WIDTH);
+				boxInfo[fieldX + 2 * offsetX][fieldY]->setY((float) fieldY * boxNS::HEIGHT);
 				boxInfo[fieldX + 2 * offsetX][fieldY]->setFieldX(fieldX + 2 * offsetX);
 				boxInfo[fieldX + 2 * offsetX][fieldY]->setFieldY(fieldY);
 			}
@@ -201,7 +201,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 		if (state == playerNS::CRUSH) {
 			//active = false;
 			spriteData.scale -= frameTime;
-			spriteData.x += (frameTime) / 2.0 * playerNS::WIDTH;
+			spriteData.x += (frameTime) / 2.0f * playerNS::WIDTH;
 			spriteData.y += (frameTime) * playerNS::HEIGHT;
 		}
 		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT * spriteData.scale;
@@ -235,14 +235,14 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 		if (state == playerNS::CRUSH) {
 			//active = false;
 			spriteData.scale -= frameTime;
-			spriteData.x += (frameTime) / 2.0 * playerNS::WIDTH;
+			spriteData.x += (frameTime) / 2.0f * playerNS::WIDTH;
 			spriteData.y += (frameTime) * playerNS::HEIGHT;
 		}
 	}
 	// 向きが変わっていた場合、プレイヤーの位置を修正
 	if ((state != playerNS::CRUSH && (oldDirection != direction || direction == playerNS::NONE)) || state == playerNS::ATTACK || state == playerNS::PUSH) {
-		int rateX = spriteData.x / playerNS::WIDTH;
-		int rateY = spriteData.y / playerNS::HEIGHT;
+		int rateX = (int) spriteData.x / playerNS::WIDTH;
+		int rateY = (int) spriteData.y / playerNS::HEIGHT;
 		if (spriteData.x - fieldX * playerNS::WIDTH >= playerNS::WIDTH / 2)
 		{
 			fieldX += 1;
@@ -259,8 +259,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			fieldY -= 1;
 		}
 
-		spriteData.x = fieldX * playerNS::WIDTH;
-		spriteData.y = fieldY * playerNS::HEIGHT;
+		spriteData.x = (float) fieldX * playerNS::WIDTH;
+		spriteData.y = (float) fieldY * playerNS::HEIGHT;
 	}
 	if (spriteData.scale < 0.0) {
 		active = false;

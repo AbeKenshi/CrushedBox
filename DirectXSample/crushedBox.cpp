@@ -228,8 +228,8 @@ void CrushedBox::roundStart()
 	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < 10; ++i) {
 			boxInfo[i][10 - 1 - j] = &createNewBox((i + j) % 4 + 4);
-			boxInfo[i][10 - 1 - j]->setX(i * boxNS::WIDTH);
-			boxInfo[i][10 - 1 - j]->setY((10 - 1 - j) * boxNS::HEIGHT);
+			boxInfo[i][10 - 1 - j]->setX((float) i * boxNS::WIDTH);
+			boxInfo[i][10 - 1 - j]->setY((float) (10 - 1 - j) * boxNS::HEIGHT);
 			boxInfo[i][10 - 1 - j]->setFieldX(i);
 			boxInfo[i][10 - 1 - j]->setFieldY(10 - 1 - j);
 		}
@@ -458,10 +458,10 @@ Box& CrushedBox::createNewBox()
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// ボックスの初期位置指定
-	newBox->setX((rand() % 10) * boxNS::WIDTH);
-	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
-	newBox->setY(boxNS::HEIGHT);
-	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
+	newBox->setX((float) (rand() % 10) * boxNS::WIDTH);
+	newBox->setFieldX((int) newBox->getX() / boxNS::WIDTH);
+	newBox->setY((float) boxNS::HEIGHT);
+	newBox->setFieldY((int) newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
 
@@ -475,10 +475,10 @@ Box& CrushedBox::createNewBox(int bt)
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// ボックスの初期位置指定
-	newBox->setX((rand() % 10) * boxNS::WIDTH);
-	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
-	newBox->setY(boxNS::HEIGHT);
-	newBox->setFieldY(newBox->getY() / boxNS::HEIGHT);
+	newBox->setX((float) (rand() % 10) * boxNS::WIDTH);
+	newBox->setFieldX((int) newBox->getX() / boxNS::WIDTH);
+	newBox->setY((float) boxNS::HEIGHT);
+	newBox->setFieldY((int) newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
 

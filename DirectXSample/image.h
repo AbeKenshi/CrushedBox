@@ -102,7 +102,7 @@ public:
 
 	// アニメーションのフレーム間の間隔を戻す
 	virtual float getFrameDelay() { 
-		return frameDelay; 
+		return (float) frameDelay; 
 	}
 
 	// 開始フレームの番号を戻す
