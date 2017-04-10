@@ -48,6 +48,7 @@ void CrushedBox::initialize(HWND hwnd)
 	fontScore.initialize(graphics, crushedBoxNS::FONT_DEFAULT_SIZE, false, false, crushedBoxNS::FONT);
 	fontTimeLimit.initialize(graphics, crushedBoxNS::FONT_DEFAULT_SIZE, false, false, crushedBoxNS::FONT);
 	fontTimeLimit.setFontColor(crushedBoxNS::FONT_COLOR);
+	fontFinished.initialize(graphics, crushedBoxNS::FONT_FINISHED_SIZE, false, false, crushedBoxNS::FONT);
 
 	// メニューのテクスチャ
 	if (!menuTexture.initialize(graphics, MENU_IMAGE))
@@ -118,6 +119,12 @@ void CrushedBox::update()
 			else
 			{
 				state = crushedBoxNS::FINISHED;
+				if (highScore < gameScore)
+				{
+					highScore = gameScore;
+				}
+				ofstream ofs("savedata\\highscore.csv");
+				ofs << highScore << std::endl;
 			}
 			if (fallingBox->getActive())
 			{
@@ -175,6 +182,12 @@ void CrushedBox::update()
 			for (int i = 0; i < 10; ++i) {
 				if (boxInfo[i][2] != NULL) {
 					state = crushedBoxNS::FINISHED;
+					if (highScore < gameScore)
+					{
+						highScore = gameScore;
+					}
+					ofstream ofs("savedata\\highscore.csv");
+					ofs << highScore << std::endl;
 					break;
 				}
 			}
@@ -182,6 +195,12 @@ void CrushedBox::update()
 			if (limitTimer < 0.0f)
 			{
 				state = crushedBoxNS::FINISHED;
+				if (highScore < gameScore)
+				{
+					highScore = gameScore;
+				}
+				ofstream ofs("savedata\\highscore.csv");
+				ofs << highScore << std::endl;
 			}
 			if (chainCount > 0)
 			{
@@ -248,6 +267,17 @@ void CrushedBox::roundStart()
 	boxScored = false;
 	gameScore = 0;
 	destroyDefaultBox = false;
+	ifstream ifs("savedata\\highscore.csv");
+	string str;
+	if (getline(ifs, str))
+	{
+		string token;
+		istringstream stream(str);
+		if (getline(stream, token, ','))
+		{
+			highScore = (int)stof(token);
+		}
+	}
 }
 
 //=============================================================================
@@ -314,9 +344,14 @@ void CrushedBox::render()
 		break;
 	case crushedBoxNS::FINISHED:
 		gameover.draw();
-		str = "YOUR SCORE IS : " + to_string(int(gameScore));
+		fontFinished.setFontColor(graphicsNS::BLUE);
+		str = "YOUR CURRENT SCORE IS : " + to_string(int(gameScore));
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
-		fontScore.print(buffer, 80, 320);
+		fontFinished.print(buffer, 50, 320);
+		fontFinished.setFontColor(graphicsNS::GREEN);
+		str = "YOUR BEST SCORE IS : " + to_string(int(highScore)); 
+		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
+		fontFinished.print(buffer, 50, 360);
 		break;
 	}
 

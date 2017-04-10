@@ -19,6 +19,7 @@ namespace crushedBoxNS
 	const char FONT[] = "Arial Bold";	// フォント
 	const int FONT_BIG_SIZE = 256;		// フォントの高さ
 	const int FONT_DEFAULT_SIZE = 36;
+	const int FONT_FINISHED_SIZE = 30;
 	const COLOR_ARGB FONT_COLOR = graphicsNS::YELLOW;
 	const COLOR_ARGB FONT_SCORE_COLOR = graphicsNS::BLUE;
 	const int SCORE_Y = 10;
@@ -54,6 +55,7 @@ private:
 	Image	gameover;				// ゲーム終了時に表示する画像
 	TextDX  fontBig;				// ゲームバナーのDirectXフォント
 	TextDX  fontScore;				// スコア表示用のDirectXフォント
+	TextDX	fontFinished;			// ゲーム終了時用のDirectXフォント
 	TextDX	fontTimeLimit;			// 残り時間表示用のDirectXフォント
 	crushedBoxNS::STATE state;		// ゲームの状態（メニュー画面、プレイ中、終了画面）
 	bool    countDownOn;			// カウントダウンが表示されている場合、true
@@ -63,6 +65,7 @@ private:
 	// ラウンド中で宇宙船のスコアが計算される場合、true
 	bool    boxScored;
 	int     gameScore;				// スコア
+	int		highScore;				// 今までのプレイにおけるハイスコア
 	bool	destroyDefaultBox;		// ステージ開始時に最初から存在していたブロックをすべて削除したかどうか
 	float	chainTimer;				// 連鎖判定に用いるカウンタ（一定時間以内にブロックを消し続けた場合、連鎖になる）
 	int		chainCount;				// 連鎖数
