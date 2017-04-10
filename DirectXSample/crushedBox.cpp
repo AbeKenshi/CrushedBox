@@ -1,4 +1,4 @@
-// Spacewarは新しく作成するクラス
+// CrushedBoxは新しく作成するクラス
 #include "crushedBox.h"
 
 //=============================================================================
@@ -6,15 +6,19 @@
 //=============================================================================
 CrushedBox::CrushedBox()
 {
+	// ステージ上に固定されたボックスの情報を初期化
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
 			boxInfo[i][j] = NULL;
 		}
 	}
+	// 最初はメニュー画面から
 	state = crushedBoxNS::MENU;
+	// カウントダウンはメニュー画面では表示しない
 	countDownOn = false;
+	// ゲームのスコアは0から
 	gameScore = 0;
-	boxScored = false;
+	// 初期化はまだ完了していない
 	initialized = false;
 }
 
@@ -23,7 +27,7 @@ CrushedBox::CrushedBox()
 //=============================================================================
 CrushedBox::~CrushedBox()
 {
-	// 固定された箱のメモリを解放
+	// 固定されたボックスのメモリを解放
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
 			if (boxInfo[i][j] != NULL) {
@@ -43,11 +47,11 @@ void CrushedBox::initialize(HWND hwnd)
 	Game::initialize(hwnd); // GameErrorをスロー
 
 	// DirectXフォントを初期化
-	fontBig.initialize(graphics, crushedBoxNS::FONT_BIG_SIZE, false, false, crushedBoxNS::FONT);
-	fontBig.setFontColor(crushedBoxNS::FONT_COLOR);
-	fontScore.initialize(graphics, crushedBoxNS::FONT_DEFAULT_SIZE, false, false, crushedBoxNS::FONT);
-	fontTimeLimit.initialize(graphics, crushedBoxNS::FONT_DEFAULT_SIZE, false, false, crushedBoxNS::FONT);
-	fontTimeLimit.setFontColor(crushedBoxNS::FONT_COLOR);
+	fontBig.initialize(graphics, crushedBoxNS::FONT_COUNT_DOWN_SIZE, false, false, crushedBoxNS::FONT);
+	fontBig.setFontColor(crushedBoxNS::FONT_COUNT_DOWN_COLOR);
+	fontScore.initialize(graphics, crushedBoxNS::FONT_SCORE_SIZE, false, false, crushedBoxNS::FONT);
+	fontTimeLimit.initialize(graphics, crushedBoxNS::FONT_SCORE_SIZE, false, false, crushedBoxNS::FONT);
+	fontTimeLimit.setFontColor(crushedBoxNS::FONT_TIME_LIMIT_COLOR);
 	fontFinished.initialize(graphics, crushedBoxNS::FONT_FINISHED_SIZE, false, false, crushedBoxNS::FONT);
 
 	// メニューのテクスチャ
@@ -128,16 +132,16 @@ void CrushedBox::update()
 			}
 			if (fallingBox->getActive())
 			{
-				// 箱を落下
+				// ボックスを落下
 				fallingBox->update(frameTime, boxInfo);
-				// プレイヤーと箱が接触していた場合、プレイヤーを挟む挙動に遷移 
+				// プレイヤーとボックスが接触していた場合、プレイヤーを挟む挙動に遷移 
 				if ((fallingBox->getX() - 0.2 <= player.getX() &&
 					fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY() &&
 					fallingBox->getY() <= player.getY())
 				{
 					player.setState(playerNS::CRUSH);
 				}
-				// 落下していた箱が接地した場合、ステージ情報をアップデート
+				// 落下していたボックス、ステージ情報をアップデート
 				if (fallingBox->getIsGrounded()) {
 					boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
 					fallingBox = &createNewBox();
@@ -242,7 +246,7 @@ void CrushedBox::roundStart()
 	}
 	// ゲーム状態をプレイ中に遷移
 	state = crushedBoxNS::ROUND;
-	// 固定された箱のメモリを解放
+	// 固定されたボックスのメモリを解放
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
 			if (boxInfo[i][j] != NULL) {
@@ -264,7 +268,6 @@ void CrushedBox::roundStart()
 	countDownTimer = crushedBoxNS::COUNT_DOWN;
 	limitTimer = crushedBoxNS::TIME_LIMIT;
 	countDownOn = true;
-	boxScored = false;
 	gameScore = 0;
 	destroyDefaultBox = false;
 	ifstream ifs("savedata\\highscore.csv");
@@ -325,7 +328,7 @@ void CrushedBox::render()
 		// プレイヤーを描画
 		player.draw();
 
-		// 箱を描画
+		// ボックスを描画
 		fallingBox->draw();
 
 		for (int i = 0; i < 10; ++i) {
@@ -344,11 +347,11 @@ void CrushedBox::render()
 		break;
 	case crushedBoxNS::FINISHED:
 		gameover.draw();
-		fontFinished.setFontColor(graphicsNS::BLUE);
+		fontFinished.setFontColor(crushedBoxNS::FONT_CURRENT_SCORE_COLOR);
 		str = "YOUR CURRENT SCORE IS : " + to_string(int(gameScore));
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
 		fontFinished.print(buffer, 50, 320);
-		fontFinished.setFontColor(graphicsNS::GREEN);
+		fontFinished.setFontColor(crushedBoxNS::FONT_BEST_SCORE_COLOR);
 		str = "YOUR BEST SCORE IS : " + to_string(int(highScore)); 
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
 		fontFinished.print(buffer, 50, 360);
@@ -371,10 +374,8 @@ void CrushedBox::consoleCommand()
 	{
 		console->print("Console Commands:");
 		console->print("fps - toggle display of frames per second");
-		console->print("gravity off - turns off planet gravity");
-		console->print("gravity on - turns on planet gravity");
-		console->print("planet off - disables planet");
-		console->print("planet on - enables planet");
+		console->print("boxInfo - view the information of boxes");
+		console->print("isGrounded - confirm that each box is grounded");
 		return;
 	}
 	if (command == "fps")
@@ -385,23 +386,10 @@ void CrushedBox::consoleCommand()
 		else
 			console->print("fps Off");
 	}
-	if (command == "objects")
-	{
-		for (int i = 0; i < 10; ++i) {
-			for (int j = 0; j < 10; ++j) {
-				if (boxInfo[i][j] != NULL) {
-					console->print(std::to_string(boxInfo[i][j]->getY()));
-					console->print(std::to_string(boxInfo[i][j]->getCurrentFrame()));
-				}
-			}
-		}
-		console->print(std::to_string(fallingBox->getCurrentFrame()));
-	}
 	if (command == "boxInfo")
 	{
 		int playerX = player.getFieldX();
 		int playerY = player.getFieldY();
-		//check();
 		for (int j = 0; j < 10; ++j) {
 			string str = "";
 			for (int i = 0; i < 10; ++i) {
@@ -484,7 +472,7 @@ Box& CrushedBox::createNewBox()
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// 色指定
 	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
-	// 箱の初期位置指定
+	// ボックスの初期位置指定
 	newBox->setX((rand() % 10) * boxNS::WIDTH);
 	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
 	newBox->setY(boxNS::HEIGHT);
@@ -502,7 +490,7 @@ Box& CrushedBox::createNewBox(int bt)
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// 色指定
 	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
-	// 箱の初期位置指定
+	// ボックスの初期位置指定
 	newBox->setX((rand() % 10) * boxNS::WIDTH);
 	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
 	newBox->setY(boxNS::HEIGHT);
@@ -601,92 +589,6 @@ bool CrushedBox::checkClingingBox() {
 	return flag;
 }
 
-//=============================================================================
-// 
-//=============================================================================
-void CrushedBox::check() {
-	BoxSet* clungingBoxList[10][10];
-	BoxSet* damy[10][10];
-	// 画面内のすべてのボックスについて、隣接しているボックスの集合を初期化
-	for (int i = 0; i < 10; ++i) {
-		for (int j = 0; j < 10; ++j) {
-			if (boxInfo[i][j] != NULL) {
-				Box* box = boxInfo[i][j];
-				// ボックスセットの初期化
-				clungingBoxList[i][j] = new BoxSet(*box);
-			}
-			else {
-				clungingBoxList[i][j] = NULL;
-			}
-			damy[i][j] = clungingBoxList[i][j];
-		}
-	}
-	// 画面内のすべてのボックスについて、隣接する同色ボックス同士を結合
-	for (int j = 0; j < 10; ++j) {
-		for (int i = 0; i < 10; ++i) {
-			if (boxInfo[i][j] != NULL && boxInfo[i][j]->getType() < 8) {
-				Box* box = boxInfo[i][j];	// 各ボックス
-				if (!box->getIsGrounded()) {
-					continue;
-				}
-				// 下
-				int newI = i;
-				int newJ = j + 1;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
-					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
-					// 下に存在するボックスと色が同じなら、結合
-					int len = clungingBoxList[newI][newJ]->getBoxSize();
-					// 下に存在するボックスのリストと結合
-					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
-					// 下に存在するボックスのリスト内の各ブロックのリストを更新
-					for (int k = 0; k < len; ++k) {
-						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
-						console->print(std::to_string(b->getFieldX()));
-						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
-					}
-				}
-				// 右
-				newI = i + 1;
-				newJ = j;
-				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
-					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
-					// 右に存在するボックスと色が同じなら、結合
-					int len = clungingBoxList[newI][newJ]->getBoxSize();
-					// 右に存在するボックスのリストと結合
-					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
-					// 右に存在するボックスのリスト内の各ブロックのリストを更新
-					for (int k = 0; k < len; ++k) {
-						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
-						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
-					}
-				}
-			}
-		}
-	}
-	for (int j = 0; j < 10; ++j) {
-		string str = "";
-		for (int i = 0; i < 10; ++i) {
-			str += ",";
-			if (boxInfo[i][j] != NULL) {
-				Box* box = boxInfo[i][j];
-				if (clungingBoxList[i][j] != NULL) {
-					str += std::to_string(clungingBoxList[i][j]->getBoxSize());
-				}
-			}
-			else {
-				str += "0";
-			}
-		}
-		console->print(str);
-	}
-	for (int i = 0; i < 10; ++i) {
-		for (int j = 0; j < 10; ++j) {
-			if (damy[i][j] != NULL) {
-				safeDelete(damy[i][j]);
-			}
-		}
-	}
-}
 
 //=============================================================================
 // ２つのボックスセットを結合させる
