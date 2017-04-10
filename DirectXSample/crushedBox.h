@@ -31,10 +31,10 @@ namespace crushedBoxNS
 	const int TIME_LIMIT_Y = SCORE_Y;										// プレイ中の残り時間表示の位置Y
 	const int COUNT_DOWN_X = GAME_WIDTH / 2 - FONT_COUNT_DOWN_SIZE / 4;		// カウントダウン表示位置X
 	const int COUNT_DOWN_Y = GAME_HEIGHT / 2 - FONT_COUNT_DOWN_SIZE / 2;	// カウントダウン表示位置Y
-	const int COUNT_DOWN = 5;												// 5秒からカウントダウン
+	const int COUNT_DOWN_TIME = 5;												// 5秒からカウントダウン
 	const int TIME_LIMIT = 90;												// 制限時間は90秒
 	const int BUF_SIZE = 40;												// DirectXフォント表示用のバッファ領域
-	enum STATE { MENU = 0, ROUND = 1, FINISHED = 2};	// ゲームの状態（メニュー画面、プレイ中、終了画面）
+	enum STATE { MENU = 0, COUNT_DOWN = 1, ROUND = 2, FINISHED = 3};	// ゲームの状態（メニュー画面、プレイ中、終了画面）
 }
 
 //=============================================================================
@@ -60,7 +60,6 @@ private:
 	TextDX	fontFinished;			// ゲーム終了時用のDirectXフォント
 	TextDX	fontTimeLimit;			// 残り時間表示用のDirectXフォント
 	crushedBoxNS::STATE state;		// ゲームの状態（メニュー画面、プレイ中、終了画面）
-	bool    countDownOn;			// カウントダウンが表示されている場合、true
 	float   countDownTimer;			// カウントダウン用のタイマー
 	float	limitTimer;				// ゲーム中の残り制限時間
 	char buffer[crushedBoxNS::BUF_SIZE];	// DirectXフォント表示用のバッファ
@@ -91,12 +90,14 @@ public:
 	// 新しいボックスオブジェクトを作成
 	Box& createNewBox();
 	Box& createNewBox(int bt);
-	// ボックスの削除判定
-	bool checkClingingBox();
+	// ３つ以上隣接しているボックスの削除
+	void deleteBox();
 	// ２つのボックスセットを結合させる
 	void clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2);
 	// ボックスセットを削除する
 	void disappear(BoxSet& boxSet);
+	// ゲームが終了したかどうか
+	bool checkRoundFinised();
 };
 
 #endif

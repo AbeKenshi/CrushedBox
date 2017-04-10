@@ -14,8 +14,6 @@ CrushedBox::CrushedBox()
 	}
 	// 最初はメニュー画面から
 	state = crushedBoxNS::MENU;
-	// カウントダウンはメニュー画面では表示しない
-	countDownOn = false;
 	// ゲームのスコアは0から
 	gameScore = 0;
 	// 初期化はまだ完了していない
@@ -98,134 +96,125 @@ void CrushedBox::initialize(HWND hwnd)
 //=============================================================================
 void CrushedBox::update()
 {
-	if (state == crushedBoxNS::MENU)
+	int cnt;
+	// ゲーム内の状態によって更新するアイテムを分岐
+	switch (state)
 	{
+	case crushedBoxNS::MENU:
+		// メニュー画面の場合
+		// 何かキーが入力された場合、カウントダウン中へ遷移
 		if (input->anyKeyPressed())
 		{
 			input->clearAll();
 			roundStart();
 		}
-	}
-	else if (countDownOn)
-	{
+		break;
+	case crushedBoxNS::COUNT_DOWN:
+		// カウントダウン中の場合
+		// カウントダウンが終了したら、プレイ中へ遷移
 		countDownTimer -= frameTime;
 		if (countDownTimer <= 0)
-			countDownOn = false;
-	}
-	else
-	{
-		if (state == crushedBoxNS::ROUND)
+			state = crushedBoxNS::ROUND;
+		break;
+	case crushedBoxNS::ROUND:
+		// プレイ中の場合
+		// プレイヤーを更新
+		if (player.getActive()) {
+			player.update(frameTime, boxInfo);
+		}
+		// 落下しているボックスを更新
+		if (fallingBox->getActive())
 		{
-			// プレイヤーが死んでいたら、ゲーム終了
-			if (player.getActive()) {
-				player.update(frameTime, boxInfo);
-			}
-			else
+			// ボックスを落下
+			fallingBox->update(frameTime, boxInfo);
+			// プレイヤーとボックスが接触していた場合、プレイヤーを挟む挙動に遷移 
+			if ((fallingBox->getX() - 0.2 <= player.getX() &&
+				fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY() &&
+				fallingBox->getY() <= player.getY())
 			{
-				state = crushedBoxNS::FINISHED;
-				if (highScore < gameScore)
-				{
-					highScore = gameScore;
-				}
-				ofstream ofs("savedata\\highscore.csv");
-				ofs << highScore << std::endl;
+				player.setState(playerNS::CRUSH);
 			}
-			if (fallingBox->getActive())
-			{
-				// ボックスを落下
-				fallingBox->update(frameTime, boxInfo);
-				// プレイヤーとボックスが接触していた場合、プレイヤーを挟む挙動に遷移 
-				if ((fallingBox->getX() - 0.2 <= player.getX() &&
-					fallingBox->getX() + 0.2 >= player.getX()) && fallingBox->getY() + boxNS::HEIGHT >= player.getY() &&
-					fallingBox->getY() <= player.getY())
-				{
-					player.setState(playerNS::CRUSH);
-				}
-				// 落下していたボックス、ステージ情報をアップデート
-				if (fallingBox->getIsGrounded()) {
-					boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
-					fallingBox = &createNewBox();
-				}
+			// 落下していたボックス、ステージ情報をアップデート
+			if (fallingBox->getIsGrounded()) {
+				boxInfo[fallingBox->getFieldX()][fallingBox->getFieldY()] = fallingBox;
+				fallingBox = &createNewBox();
 			}
-			checkClingingBox();
-			// 接地したブロックについて
-			for (int i = 0; i < 10; ++i) {
-				for (int j = 0; j < 10; ++j) {
-					if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive() && boxInfo[i][j]->getType() < 8) {
-						// 移動しているブロックがあれば、フィールド情報をアップデート
-						boxInfo[i][j]->update(frameTime, boxInfo);
-						if (boxInfo[i][j]->getIsGrounded()) {
-							Box* tmp = boxInfo[i][j];
-							int x = boxInfo[i][j]->getFieldX();
-							int y = boxInfo[i][j]->getFieldY();
-							if (x != i || y != j) {
-								boxInfo[x][y] = tmp;
-								boxInfo[i][j] = NULL;
-								state = crushedBoxNS::ROUND;
-							}
-							// boxInfo[boxInfo[i][j]->getFieldX()][boxInfo[i][j]->getFieldY()] = boxInfo[i][j];
-							// boxInfo[i][j] = NULL;
+		}
+		// ３つ以上隣接しているボックスを削除
+		deleteBox();
+		// 接地したブロックについて
+		for (int i = 0; i < 10; ++i) {
+			for (int j = 0; j < 10; ++j) {
+				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getActive() && boxInfo[i][j]->getType() < 8) {
+					// 移動しているブロックがあれば、フィールド情報をアップデート
+					boxInfo[i][j]->update(frameTime, boxInfo);
+					if (boxInfo[i][j]->getIsGrounded()) {
+						Box* tmp = boxInfo[i][j];
+						int x = boxInfo[i][j]->getFieldX();
+						int y = boxInfo[i][j]->getFieldY();
+						if (x != i || y != j) {
+							boxInfo[x][y] = tmp;
+							boxInfo[i][j] = NULL;
+							state = crushedBoxNS::ROUND;
 						}
 					}
 				}
 			}
-			// すべての×ブロックが破壊されていれば、ボーナスポイント
-			int cnt = 0;
-			for (int j = 0; j < 2; ++j) {
-				for (int i = 0; i < 10; ++i) {
-					if (boxInfo[i][10 - 1 - j] != NULL && boxInfo[i][10 - 1 - j]->getType() < 8 && boxInfo[i][10 - 1 - j]->getType() > 3) {
-						cnt += 1;
-					}
-				}
-			}
-			if (!destroyDefaultBox && cnt == 0) {
-				destroyDefaultBox = true;
-				gameScore += 8000;
-			}
-			// 一定以上ブロックが積み重なっていれば、ゲーム終了
+		}
+		// すべての×ブロックが破壊されていれば、ボーナスポイント
+		cnt = 0;
+		for (int j = 0; j < 2; ++j) {
 			for (int i = 0; i < 10; ++i) {
-				if (boxInfo[i][2] != NULL) {
-					state = crushedBoxNS::FINISHED;
-					if (highScore < gameScore)
-					{
-						highScore = gameScore;
-					}
-					ofstream ofs("savedata\\highscore.csv");
-					ofs << highScore << std::endl;
-					break;
+				if (boxInfo[i][10 - 1 - j] != NULL && boxInfo[i][10 - 1 - j]->getType() < 8 && boxInfo[i][10 - 1 - j]->getType() > 3) {
+					cnt += 1;
 				}
-			}
-			limitTimer -= frameTime;
-			if (limitTimer < 0.0f)
-			{
-				state = crushedBoxNS::FINISHED;
-				if (highScore < gameScore)
-				{
-					highScore = gameScore;
-				}
-				ofstream ofs("savedata\\highscore.csv");
-				ofs << highScore << std::endl;
-			}
-			if (chainCount > 0)
-			{
-				chainTimer += frameTime;
 			}
 		}
-		else
+		if (!destroyDefaultBox && cnt == 0) {
+			destroyDefaultBox = true;
+			gameScore += 8000;
+		}
+		// 制限時間を進める
+		limitTimer -= frameTime;
+		// ゲームが終了しているかどうかチェック
+		// ゲームが終了している場合は、終了時の処理を行って終了画面へ遷移
+		if (checkRoundFinised())
 		{
-			if (input->isKeyDown(VK_ESCAPE))
-			{
-				input->clearAll();
-				exitGame();
+			state = crushedBoxNS::FINISHED;
+			safeDelete(fallingBox);
+			fallingBox = NULL;
+			// 固定されたボックスのメモリを解放
+			for (int i = 0; i < 10; ++i) {
+				for (int j = 0; j < 10; ++j) {
+					if (boxInfo[i][j] != NULL) {
+						safeDelete(boxInfo[i][j]);
+					}
+				}
 			}
-			else if (input->anyKeyPressed())
+			if (highScore < gameScore)
 			{
-				input->clearAll();
-				roundStart();
+				highScore = gameScore;
 			}
+			ofstream ofs("savedata\\highscore.csv");
+			ofs << highScore << std::endl;
 		}
+		break;
+	case crushedBoxNS::FINISHED:
+		// ゲーム終了画面の場合
+		// Escキーが押された場合、プログラム終了
+		if (input->isKeyDown(VK_ESCAPE))
+		{
+			input->clearAll();
+			exitGame();
+		}
+		// それ以外のキーが押された場合、再度ゲームスタート
+		else if (input->anyKeyPressed())
+		{
+			input->clearAll();
+			roundStart();
+		}
+		break;
 	}
-
 }
 
 //=============================================================================
@@ -233,27 +222,9 @@ void CrushedBox::update()
 //=============================================================================
 void CrushedBox::roundStart()
 {
-	// 2つの宇宙船は惑星を挟んで両側から出発し、一定の軌道上を時計回りに周回
-//	fallingBox->setX(100);
-//	fallingBox->setY(0);
-//	fallingBox->setVelocity(VECTOR2(0, -boxNS::FIRST_SPEED));
-//	fallingBox->setDegrees(0);
-//	fallingBox->repair();
-	if (state == crushedBoxNS::FINISHED)
-	{
-		safeDelete(fallingBox);
-		fallingBox = NULL;
-	}
-	// ゲーム状態をプレイ中に遷移
-	state = crushedBoxNS::ROUND;
-	// 固定されたボックスのメモリを解放
-	for (int i = 0; i < 10; ++i) {
-		for (int j = 0; j < 10; ++j) {
-			if (boxInfo[i][j] != NULL) {
-				safeDelete(boxInfo[i][j]);
-			}
-		}
-	}
+	// 状態をカウントダウン中に遷移
+	state = crushedBoxNS::COUNT_DOWN;
+	// デフォルトで存在するボックス群を初期化
 	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < 10; ++i) {
 			boxInfo[i][10 - 1 - j] = &createNewBox((i + j) % 4 + 4);
@@ -263,13 +234,18 @@ void CrushedBox::roundStart()
 			boxInfo[i][10 - 1 - j]->setFieldY(10 - 1 - j);
 		}
 	}
-	fallingBox = &(createNewBox());
-	player.init();
-	countDownTimer = crushedBoxNS::COUNT_DOWN;
-	limitTimer = crushedBoxNS::TIME_LIMIT;
-	countDownOn = true;
-	gameScore = 0;
 	destroyDefaultBox = false;
+	// 落下してくるボックスを初期化
+	fallingBox = &(createNewBox());
+	// プレイヤーの初期化
+	player.init();
+	// カウントダウンタイマーの初期化
+	countDownTimer = crushedBoxNS::COUNT_DOWN_TIME;
+	// 制限時間の初期化
+	limitTimer = crushedBoxNS::TIME_LIMIT;
+	// スコアの初期化
+	gameScore = 0;
+	// ハイスコアの読み込み
 	ifstream ifs("savedata\\highscore.csv");
 	string str;
 	if (getline(ifs, str))
@@ -281,6 +257,10 @@ void CrushedBox::roundStart()
 			highScore = (int)stof(token);
 		}
 	}
+	// 連鎖数の初期化
+	chainCount = 0;
+	// 連鎖用のタイマーの初期化
+	chainTimer = 0.0f;
 }
 
 //=============================================================================
@@ -309,28 +289,30 @@ void CrushedBox::render()
 	switch (state)
 	{
 	case crushedBoxNS::MENU:
+		// メニュー画面の場合
+		// メニュー画面を描画
 		menu.draw();
 		break;
+	case crushedBoxNS::COUNT_DOWN:
+		// カウントダウン中も、ゲーム画面のレンダリングは行う
 	case crushedBoxNS::ROUND:
-		background.draw();				// オリオン星雲をシーンに追加
-
+		// プレイ中の場合
+		// 背景の描画
+		background.draw();
 		// スコアを表示
 		fontScore.setFontColor(crushedBoxNS::FONT_SCORE_COLOR);
 		str = "SCORE : " + to_string(gameScore);
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
 		fontScore.print(buffer, crushedBoxNS::SCORE_X, crushedBoxNS::SCORE_Y);
-
 		// 残り時間を表示
 		str = "TIME : " + to_string(int(limitTimer));
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
 		fontTimeLimit.print(buffer, crushedBoxNS::TIME_LIMIT_X, crushedBoxNS::TIME_LIMIT_Y);
-
 		// プレイヤーを描画
 		player.draw();
-
-		// ボックスを描画
+		// 落下中のボックスを描画
 		fallingBox->draw();
-
+		// 固定されているボックスを描画
 		for (int i = 0; i < 10; ++i) {
 			for (int j = 0; j < 10; ++j) {
 				if (boxInfo[i][j] != NULL && boxInfo[i][j]->getType() < 8) {
@@ -338,21 +320,25 @@ void CrushedBox::render()
 				}
 			}
 		}
-
-		if (countDownOn)
+		// カウントダウン中であれば、さらにカウントダウン用のフォントを描画
+		if (state == crushedBoxNS::COUNT_DOWN)
 		{
 			_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%d", (int)(ceil(countDownTimer)));
 			fontBig.print(buffer, crushedBoxNS::COUNT_DOWN_X, crushedBoxNS::COUNT_DOWN_Y);
 		}
 		break;
 	case crushedBoxNS::FINISHED:
+		// ゲーム終了画面の場合、
+		// ゲーム終了画面を描画
 		gameover.draw();
+		// 今回のスコアを描画
 		fontFinished.setFontColor(crushedBoxNS::FONT_CURRENT_SCORE_COLOR);
 		str = "YOUR CURRENT SCORE IS : " + to_string(int(gameScore));
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
 		fontFinished.print(buffer, 50, 320);
+		// これまでのハイスコアを描画
 		fontFinished.setFontColor(crushedBoxNS::FONT_BEST_SCORE_COLOR);
-		str = "YOUR BEST SCORE IS : " + to_string(int(highScore)); 
+		str = "YOUR BEST SCORE IS : " + to_string(int(highScore));
 		_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%s", str.c_str());
 		fontFinished.print(buffer, 50, 360);
 		break;
@@ -467,11 +453,10 @@ void CrushedBox::resetAll()
 //=============================================================================
 Box& CrushedBox::createNewBox()
 {
+	// ボックスインスタンスを生成
 	Box* newBox = new Box();
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
-	// 色指定
-	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
 	// ボックスの初期位置指定
 	newBox->setX((rand() % 10) * boxNS::WIDTH);
 	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
@@ -485,11 +470,10 @@ Box& CrushedBox::createNewBox()
 //=============================================================================
 Box& CrushedBox::createNewBox(int bt)
 {
+	// ボックスインスタンスを生成
 	Box* newBox = new Box(bt);
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
-	// 色指定
-	newBox->setColorFilter(SETCOLOR_ARGB(255, 0, 0, 0));
 	// ボックスの初期位置指定
 	newBox->setX((rand() % 10) * boxNS::WIDTH);
 	newBox->setFieldX(newBox->getX() / boxNS::WIDTH);
@@ -501,8 +485,8 @@ Box& CrushedBox::createNewBox(int bt)
 //=============================================================================
 // ボックスの削除判定
 //=============================================================================
-bool CrushedBox::checkClingingBox() {
-	BoxSet* clungingBoxList[10][10];
+void CrushedBox::deleteBox() {
+	BoxSet* deletedBoxList[10][10];
 	BoxSet* damy[10][10];
 	// 画面内のすべてのボックスについて、隣接しているボックスの集合を初期化
 	for (int i = 0; i < 10; ++i) {
@@ -510,12 +494,12 @@ bool CrushedBox::checkClingingBox() {
 			if (boxInfo[i][j] != NULL) {
 				Box* box = boxInfo[i][j];
 				// ボックスセットの初期化
-				clungingBoxList[i][j] = new BoxSet(*box);
+				deletedBoxList[i][j] = new BoxSet(*box);
 			}
 			else {
-				clungingBoxList[i][j] = NULL;
+				deletedBoxList[i][j] = NULL;
 			}
-			damy[i][j] = clungingBoxList[i][j];
+			damy[i][j] = deletedBoxList[i][j];
 		}
 	}
 	// 画面内のすべてのボックスについて、破壊されたボックスがあれば削除
@@ -539,13 +523,13 @@ bool CrushedBox::checkClingingBox() {
 				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
 					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 下に存在するボックスと色が同じなら、結合
-					int len = clungingBoxList[newI][newJ]->getBoxSize();
+					int len = deletedBoxList[newI][newJ]->getBoxSize();
 					// 下に存在するボックスのリストと結合
-					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
+					clungBoxSet(*deletedBoxList[i][j], *deletedBoxList[newI][newJ]);
 					// 下に存在するボックスのリスト内の各ブロックのリストを更新
 					for (int k = 0; k < len; ++k) {
-						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
-						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
+						Box* b = &(deletedBoxList[newI][newJ]->getBox(k));
+						deletedBoxList[b->getFieldX()][b->getFieldY()] = deletedBoxList[i][j];
 					}
 				}
 				// 右
@@ -554,31 +538,31 @@ bool CrushedBox::checkClingingBox() {
 				if (newI < 10 && newJ < 10 && boxInfo[newI][newJ] != NULL && boxInfo[newI][newJ]->getType() < 8 &&
 					box->getType() % 4 == boxInfo[newI][newJ]->getType() % 4 && boxInfo[newI][newJ]->getIsGrounded()) {
 					// 右に存在するボックスと色が同じなら、結合
-					int len = clungingBoxList[newI][newJ]->getBoxSize();
+					int len = deletedBoxList[newI][newJ]->getBoxSize();
 					// 右に存在するボックスのリストと結合
-					clungBoxSet(*clungingBoxList[i][j], *clungingBoxList[newI][newJ]);
+					clungBoxSet(*deletedBoxList[i][j], *deletedBoxList[newI][newJ]);
 					// 右に存在するボックスのリスト内の各ブロックのリストを更新
 					for (int k = 0; k < len; ++k) {
-						Box* b = &(clungingBoxList[newI][newJ]->getBox(k));
-						clungingBoxList[b->getFieldX()][b->getFieldY()] = clungingBoxList[i][j];
+						Box* b = &(deletedBoxList[newI][newJ]->getBox(k));
+						deletedBoxList[b->getFieldX()][b->getFieldY()] = deletedBoxList[i][j];
 					}
 				}
 			}
 		}
 	}
-	bool flag = false;
+	// ３つ以上隣接していたボックスセット内のボックスを削除
 	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 10; ++i) {
 			if (boxInfo[i][j] != NULL) {
 				Box* box = boxInfo[i][j];
-				if (clungingBoxList[i][j] != NULL && clungingBoxList[i][j]->getBoxSize() >= 3) {
-					disappear(*clungingBoxList[i][j]);
-					clungingBoxList[i][j] = NULL;
-					flag = true;
+				if (deletedBoxList[i][j] != NULL && deletedBoxList[i][j]->getBoxSize() >= 3) {
+					disappear(*deletedBoxList[i][j]);
+					deletedBoxList[i][j] = NULL;
 				}
 			}
 		}
 	}
+	// ダミーオブジェクトのメモリ解放
 	for (int i = 0; i < 10; ++i) {
 		for (int j = 0; j < 10; ++j) {
 			if (damy[i][j] != NULL) {
@@ -586,7 +570,8 @@ bool CrushedBox::checkClingingBox() {
 			}
 		}
 	}
-	return flag;
+	// 連鎖用のタイマーを進める
+	chainTimer += frameTime;
 }
 
 
@@ -603,19 +588,47 @@ void CrushedBox::clungBoxSet(BoxSet& boxSet1, BoxSet& boxSet2) {
 // ボックスセットを削除する
 //=============================================================================
 void CrushedBox::disappear(BoxSet& boxSet) {
+	// 前にボックスセットを削除してから、一定時間以内にこのメソッドが呼ばれたら
 	if (chainCount > 0 && chainTimer < 0.25f)
 	{
+		// 連鎖数を増加
 		chainCount += 1;
 	}
+	// 一定時間以上経過していたら、
 	else
 	{
+		// 連鎖数は1にリセット
 		chainCount = 1;
 	}
+	// 連鎖用のタイマーをリセット
+	chainTimer = 0.0f;
 	// 各ボックスの情報を盤面情報から削除
 	gameScore += chainCount * (100 + 50 * (boxSet.getBoxSize() - 3));
 	for (int i = 0; i < boxSet.getBoxSize(); ++i) {
 		safeDelete(boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()]);
 		boxInfo[boxSet.getBox(i).getFieldX()][boxSet.getBox(i).getFieldY()] = NULL;
 	}
-	chainTimer = 0.0f;
+}
+
+//=============================================================================
+// ボックスセットを削除する
+//=============================================================================
+bool CrushedBox::checkRoundFinised() {
+	// プレイヤーが死んでいれば、ゲーム終了
+	if (!player.getActive())
+	{
+		return true;
+	}
+	// プレイ時間が制限時間を上回っていれば、ゲーム終了
+	if (limitTimer < 0.0f)
+	{
+		return true;
+	}
+	// 一定以上ブロックが積み重なっていれば、ゲーム終了
+	for (int i = 0; i < 10; ++i) {
+		if (boxInfo[i][2] != NULL) {
+			return true;
+		}
+	}
+	return false;
 }
