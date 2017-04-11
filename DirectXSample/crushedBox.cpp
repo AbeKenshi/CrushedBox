@@ -88,6 +88,8 @@ void CrushedBox::initialize(HWND hwnd)
 	if (!player.initialize(this, playerNS::WIDTH, playerNS::HEIGHT, playerNS::TEXTURE_COLS, &playerTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player"));
 
+	// タイトルBGM再生
+	audio->playCue(TITLE_BGM);
 	return;
 }
 
@@ -106,6 +108,7 @@ void CrushedBox::update()
 		if (input->anyKeyPressed())
 		{
 			input->clearAll();
+			audio->stopCue(TITLE_BGM);
 			roundStart();
 		}
 		break;
@@ -197,6 +200,8 @@ void CrushedBox::update()
 			}
 			ofstream ofs("savedata\\highscore.csv");
 			ofs << highScore << std::endl;
+			audio->stopCue(MAIN_BGM);
+			audio->playCue(GAMEOVER_BGM);
 		}
 		break;
 	case crushedBoxNS::FINISHED:
@@ -211,6 +216,7 @@ void CrushedBox::update()
 		else if (input->anyKeyPressed())
 		{
 			input->clearAll();
+			audio->stopCue(GAMEOVER_BGM);
 			roundStart();
 		}
 		break;
@@ -261,6 +267,8 @@ void CrushedBox::roundStart()
 	chainCount = 0;
 	// 連鎖用のタイマーの初期化
 	chainTimer = 0.0f;
+	// プレイ中BGM再生
+	audio->playCue(MAIN_BGM);
 }
 
 //=============================================================================

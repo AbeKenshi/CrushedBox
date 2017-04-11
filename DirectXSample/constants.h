@@ -38,20 +38,16 @@ const char DASHBOARD_TEXTURES[] = "pictures\\dashboard.png";
 
 // audio files required by audio.cpp
 // WAVE_BANK must be location of .xwb file.
-const char WAVE_BANK[] = "audio\\Win\\waveBank.xwb";
+const char WAVE_BANK[] = "audio\\Win\\Wave Bank.xwb";
 // SOUND_BANK must be location of .xsb file.
-const char SOUND_BANK[] = "audio\\Win\\soundBank.xsb";
+const char SOUND_BANK[] = "audio\\Win\\Sound Bank.xsb";
 
 // audio cues
-const char CHEER[] = "cheer";
-const char COLLIDE[] = "collide";
-const char EXPLODE[] = "explode";
-const char ENGINE1[] = "engine1";
-const char ENGINE2[] = "engine2";
-const char TORPEDO_CRASH[] = "torpedoCrash";
-const char TORPEDO_FIRE[] = "torpedoFire";
-const char TORPEDO_HIT[] = "torpedoHit";
-
+const char TITLE_BGM[] = "stage03";
+const char MAIN_BGM[] = "title01";
+const char PLAYER_ATTACK_AUDIO[] = "attack01";
+const char PLAYER_PUSH_AUDIO[] = "hit02";
+const char GAMEOVER_BGM[] = "clear01";
 
 // key mappings
 // In this game simple constants are used for key mappings. If variables were used

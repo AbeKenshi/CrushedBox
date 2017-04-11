@@ -199,7 +199,6 @@ void Box::damage(WEAPON weapon)
 //=============================================================================
 void Box::explode()
 {
-	audio->playCue(EXPLODE);
 	active = false;
 	health = 0;
 	explosionOn = true;

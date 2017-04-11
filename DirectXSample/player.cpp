@@ -108,6 +108,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			// 状態を攻撃中に遷移
 			state = playerNS::ATTACK;
 			stateTimer = 0.3f;
+			audio->playCue(PLAYER_ATTACK_AUDIO);
 		}
 		// ボックスプッシュキーが押された場合、
 		if (input->isKeyDown(PLAYER_PUSH_KEY))
@@ -115,6 +116,7 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			// 状態をプッシュ中に遷移
 			state = playerNS::PUSH;
 			stateTimer = 0.3f;
+			audio->playCue(PLAYER_PUSH_AUDIO);
 		}
 		break;
 	case playerNS::ATTACK:	// 攻撃中は一定時間経過するまで入力を受け付けない
@@ -140,7 +142,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 				offsetY = 1;
 				break;
 			}
-			if (boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL && boxInfo[fieldX + offsetX][fieldY + offsetY]->getType() < 8) {
+			if (fieldX + offsetX >= 0 && fieldX + offsetX < 10 && fieldY + offsetY >= 0 && fieldY + offsetY < 10 && 
+				boxInfo[fieldX + offsetX][fieldY + offsetY] != NULL && boxInfo[fieldX + offsetX][fieldY + offsetY]->getType() < 8) {
 				boxInfo[fieldX + offsetX][fieldY + offsetY]->damage(PLAYER_ATTACK);
 			}
 		}
@@ -162,7 +165,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 				offsetX = 1;
 				break;
 			}
-			if (boxInfo[fieldX + offsetX][fieldY] != NULL && boxInfo[fieldX + 2 * offsetX][fieldY] == NULL)
+			if (fieldX + offsetX >= 1 && fieldX + offsetX < 9 && 
+				boxInfo[fieldX + offsetX][fieldY] != NULL && boxInfo[fieldX + 2 * offsetX][fieldY] == NULL)
 			{
 				boxInfo[fieldX + offsetX][fieldY]->pushed(offsetX);
 				// ダミーをボックスを生成、移動先に他のブロックが降ってこないようにする
