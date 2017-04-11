@@ -37,7 +37,7 @@ public:
 	virtual void draw();
 	virtual bool initialize(Game *gamePtr, int width, int height, int ncols,
 		TextureManager *textureM);
-	void update(float frameTime, Box* boxInfo[10][10]);
+	void update(float frameTime, Box* boxInfo[10][10], Box* fallingBox);
 	void damage(WEAPON);
 
 	// V‚µ‚¢ƒƒ“ƒo[ŠÖ”

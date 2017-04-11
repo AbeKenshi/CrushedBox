@@ -123,7 +123,7 @@ void CrushedBox::update()
 		// プレイ中の場合
 		// プレイヤーを更新
 		if (player.getActive()) {
-			player.update(frameTime, boxInfo);
+			player.update(frameTime, boxInfo, fallingBox);
 		}
 		// 落下しているボックスを更新
 		if (fallingBox->getActive())

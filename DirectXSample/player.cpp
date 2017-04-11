@@ -66,7 +66,7 @@ void Player::draw()
 // 通常、フレームごとに1回呼び出す
 // frameTimeは、移動とアニメーションお速さを制御するために使用
 //=============================================================================
-void Player::update(float frameTime, Box* boxInfo[10][10])
+void Player::update(float frameTime, Box* boxInfo[10][10], Box* fallingBox)
 {
 	Entity::update(frameTime);
 	// 上下左右キーが入力された場合、
@@ -227,9 +227,14 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 	int signX = (velocity.x > 0) - (velocity.x < 0);
 	int signY = (velocity.y > 0) - (velocity.y < 0);
 	// 移動先にボックスが存在したら、移動前に座標を戻す
+	if (fallingBox->getFieldX() == fieldX + signX && fallingBox->getFieldY() + 1 == fieldY + signY)
+	{
+		spriteData.x = (float)fieldX * playerNS::WIDTH;
+		spriteData.y = (float)fieldY * playerNS::HEIGHT;
+	}
 	if (fieldX + signX >= 0 && fieldX + signX < GAME_WIDTH / boxNS::WIDTH &&
-		(boxInfo[fieldX + signX][fieldY + signY] != NULL || 
-		(boxInfo[fieldX + signX][fieldY + signY - 1] != NULL && 
+		(boxInfo[fieldX + signX][fieldY + signY] != NULL ||
+		(boxInfo[fieldX + signX][fieldY + signY - 1] != NULL &&
 			!boxInfo[fieldX + signX][fieldY + signY - 1]->getIsGrounded())))
 	{
 		spriteData.x = oldX;
@@ -240,13 +245,13 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			//active = false;
 			spriteData.scale -= frameTime;
 			spriteData.x += (frameTime) / 2.0f * playerNS::WIDTH;
-			spriteData.y += (frameTime) * playerNS::HEIGHT;
+			spriteData.y += (frameTime)* playerNS::HEIGHT;
 		}
 	}
 	// 向きが変わっていた場合、プレイヤーの位置を修正
 	if ((state != playerNS::CRUSH && (oldDirection != direction || direction == playerNS::NONE)) || state == playerNS::ATTACK || state == playerNS::PUSH) {
-		int rateX = (int) spriteData.x / playerNS::WIDTH;
-		int rateY = (int) spriteData.y / playerNS::HEIGHT;
+		int rateX = (int)spriteData.x / playerNS::WIDTH;
+		int rateY = (int)spriteData.y / playerNS::HEIGHT;
 		if (spriteData.x - fieldX * playerNS::WIDTH >= playerNS::WIDTH / 2)
 		{
 			fieldX += 1;
@@ -263,8 +268,8 @@ void Player::update(float frameTime, Box* boxInfo[10][10])
 			fieldY -= 1;
 		}
 
-		spriteData.x = (float) fieldX * playerNS::WIDTH;
-		spriteData.y = (float) fieldY * playerNS::HEIGHT;
+		spriteData.x = (float)fieldX * playerNS::WIDTH;
+		spriteData.y = (float)fieldY * playerNS::HEIGHT;
 	}
 	if (spriteData.scale < 0.0) {
 		active = false;
