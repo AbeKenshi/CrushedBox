@@ -213,8 +213,8 @@ void CrushedBox::update()
 			input->clearAll();
 			exitGame();
 		}
-		// それ以外のキーが押された場合、再度ゲームスタート
-		else if (input->anyKeyPressed())
+		// エンターキーが押された場合、再度ゲームスタート
+		else if (input->isKeyDown(VK_RETURN))
 		{
 			input->clearAll();
 			audio->stopCue(GAMEOVER_BGM);
