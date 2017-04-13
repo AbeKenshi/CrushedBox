@@ -1,5 +1,6 @@
 // CrushedBoxは新しく作成するクラス
 #include "crushedBox.h"
+#include <time.h>
 
 //=============================================================================
 // コンストラクタ
@@ -228,6 +229,8 @@ void CrushedBox::update()
 //=============================================================================
 void CrushedBox::roundStart()
 {
+	// 乱数のシードを設定
+	srand((unsigned int)time(NULL));
 	// 状態をカウントダウン中に遷移
 	state = crushedBoxNS::COUNT_DOWN;
 	// デフォルトで存在するボックス群を初期化
