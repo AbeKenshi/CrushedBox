@@ -31,10 +31,10 @@ namespace crushedBoxNS
 	const int TIME_LIMIT_Y = SCORE_Y;										// プレイ中の残り時間表示の位置Y
 	const int COUNT_DOWN_X = GAME_WIDTH / 2 - FONT_COUNT_DOWN_SIZE / 4;		// カウントダウン表示位置X
 	const int COUNT_DOWN_Y = GAME_HEIGHT / 2 - FONT_COUNT_DOWN_SIZE / 2;	// カウントダウン表示位置Y
-	const int COUNT_DOWN_TIME = 5;												// 5秒からカウントダウン
+	const int COUNT_DOWN_TIME = 5;											// 5秒からカウントダウン
 	const int TIME_LIMIT = 90;												// 制限時間は90秒
 	const int BUF_SIZE = 40;												// DirectXフォント表示用のバッファ領域
-	enum STATE { MENU = 0, COUNT_DOWN = 1, ROUND = 2, FINISHED = 3};	// ゲームの状態（メニュー画面、プレイ中、終了画面）
+	enum STATE { MENU = 0, COUNT_DOWN = 1, ROUND = 2, PRE_FINISHED = 3, FINISHED = 4};	// ゲームの状態（メニュー画面、カウントダウン中、プレイ中、ゲーム終了テロップ表示中、終了画面）
 }
 
 //=============================================================================
@@ -44,9 +44,10 @@ class CrushedBox : public Game
 {
 private:
 	// ゲームアイテム
-	TextureManager menuTexture;		// タイトルのテクスチャ
-	TextureManager gameoverTexture;	// ゲーム終了時に表示するテクスチャ
+	TextureManager menuTexture;		// タイトル画面のテクスチャ
+	TextureManager gameoverTexture;	// ゲーム終了画面のテクスチャ
 	TextureManager backgroundTexture;	// 背景のテクスチャ
+	TextureManager gamefinishTelopTexture;	// ゲーム終了時点で表示するテクスチャ
 	TextureManager boxTextures;		// ボックスのテクスチャ
 	TextureManager playerTextures;	// ゲームに使用するテクスチャ群
 	Player player;					// プレイヤーが操作するオブジェクト
@@ -54,7 +55,8 @@ private:
 	Box* boxInfo[10][10];			// ステージ上に固定されたボックス情報
 	Image background;				// 背景の画像
 	Image   menu;					// メニューの画像
-	Image	gameover;				// ゲーム終了時に表示する画像
+	Image	gameover;				// ゲーム終了画面で表示する画像
+	Image	gamefinishTelop;		// ゲーム終了時点で表示する画像
 	TextDX  fontBig;				// ゲームバナーのDirectXフォント
 	TextDX  fontScore;				// スコア表示用のDirectXフォント
 	TextDX	fontFinished;			// ゲーム終了時用のDirectXフォント

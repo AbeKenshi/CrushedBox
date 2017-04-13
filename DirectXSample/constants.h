@@ -15,7 +15,7 @@
 
 // window
 const char CLASS_NAME[] = "Crushed Box";
-const char GAME_TITLE[] = "Crushed Box v0.1";
+const char GAME_TITLE[] = "Crushed Box v1.0";
 const bool FULLSCREEN = false;              // windowed or fullscreen
 const UINT GAME_WIDTH = 480;               // width of game in pixels
 const UINT GAME_HEIGHT = 480;               // height of game in pixels
@@ -33,7 +33,8 @@ const char BACKGROUND_IMAGE[] = "pictures\\background.png";		// photo source NAS
 const char BOX_TEXTURES_IMAGE[] = "pictures\\box.png";	// ボックスのテクスチャ
 const char TEXTURES_IMAGE[] = "pictures\\player.png";		// game textures
 const char MENU_IMAGE[] = "pictures\\menu.png";			// menu texture
-const char GAMEOVER_IMAGE[] = "pictures\\gameover.png";	// gameover texture
+const char GAMEOVER_SCREEN_IMAGE[] = "pictures\\gameover.png";	// gameover texture
+const char GAMEFINISH_IMAGE[] = "pictures\\gamefinish.png";
 const char DASHBOARD_TEXTURES[] = "pictures\\dashboard.png";
 
 // audio files required by audio.cpp

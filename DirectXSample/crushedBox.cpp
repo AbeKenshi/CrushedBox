@@ -57,13 +57,17 @@ void CrushedBox::initialize(HWND hwnd)
 	if (!menuTexture.initialize(graphics, MENU_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing menu texture"));
 
-	// ゲーム終了時に表示するテクスチャ
-	if (!gameoverTexture.initialize(graphics, GAMEOVER_IMAGE))
+	// ゲーム終了画面のテクスチャ
+	if (!gameoverTexture.initialize(graphics, GAMEOVER_SCREEN_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing gameover texture"));
 
 	// 背景のテクスチャ
 	if (!backgroundTexture.initialize(graphics, BACKGROUND_IMAGE))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula texture"));
+
+	// ゲーム終了時に表示するテクスチャ
+	if (!gamefinishTelopTexture.initialize(graphics, GAMEFINISH_IMAGE))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing gamefinish subtitle texture"));
 
 	// ボックスのテクスチャ
 	if (!boxTextures.initialize(graphics, BOX_TEXTURES_IMAGE))
@@ -83,7 +87,11 @@ void CrushedBox::initialize(HWND hwnd)
 
 	// 背景の画像
 	if (!background.initialize(graphics, 0, 0, 0, &backgroundTexture))
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula"));
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing background"));
+
+	// ゲーム終了時に表示する画像
+	if (!gamefinishTelop.initialize(graphics, 0, 0, 0, &gamefinishTelopTexture))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing gamefinish subtitle"));
 
 	// プレイヤー
 	if (!player.initialize(this, playerNS::WIDTH, playerNS::HEIGHT, playerNS::TEXTURE_COLS, &playerTextures))
@@ -181,30 +189,46 @@ void CrushedBox::update()
 		// 制限時間を進める
 		limitTimer -= frameTime;
 		// ゲームが終了しているかどうかチェック
-		// ゲームが終了している場合は、終了時の処理を行って終了画面へ遷移
+		// ゲームが終了している場合は、BGMを切り替えてテロップ表示状態へ遷移
 		if (checkRoundFinised())
 		{
-			state = crushedBoxNS::FINISHED;
-			safeDelete(fallingBox);
-			fallingBox = NULL;
-			// 固定されたボックスのメモリを解放
-			for (int i = 0; i < 10; ++i) {
-				for (int j = 0; j < 10; ++j) {
-					if (boxInfo[i][j] != NULL) {
-						safeDelete(boxInfo[i][j]);
-					}
-				}
-			}
-			if (highScore < gameScore)
-			{
-				highScore = gameScore;
-			}
-			ofstream ofs("savedata\\highscore.csv");
-			ofs << highScore << std::endl;
+			state = crushedBoxNS::PRE_FINISHED;
 			audio->stopCue(MAIN_BGM);
 			audio->playCue(GAMEOVER_BGM);
+			countDownTimer = 2.0f;
 		}
 		break;
+	case crushedBoxNS::PRE_FINISHED:
+		// テロップ表示状態の場合
+		// テロップが定位置に来るまでは、テロップ画像を移動
+		if (gamefinishTelop.getY() < 200.0f) {
+			gamefinishTelop.setY(gamefinishTelop.getY() + frameTime * 120.0f);
+		}
+		// テロップが定位置に来た場合、
+		else {
+			// 一定時間テロップを表示、その後、終了時の処理を行ってゲーム終了画面へ遷移
+			countDownTimer -= frameTime;
+			if (countDownTimer < 0.0f)
+			{
+				state = crushedBoxNS::FINISHED;
+				safeDelete(fallingBox);
+				fallingBox = NULL;
+				// 固定されたボックスのメモリを解放
+				for (int i = 0; i < 10; ++i) {
+					for (int j = 0; j < 10; ++j) {
+						if (boxInfo[i][j] != NULL) {
+							safeDelete(boxInfo[i][j]);
+						}
+					}
+				}
+				if (highScore < gameScore)
+				{
+					highScore = gameScore;
+				}
+				ofstream ofs("savedata\\highscore.csv");
+				ofs << highScore << std::endl;
+			}
+		}
 	case crushedBoxNS::FINISHED:
 		// ゲーム終了画面の場合
 		// Escキーが押された場合、プログラム終了
@@ -237,8 +261,8 @@ void CrushedBox::roundStart()
 	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < 10; ++i) {
 			boxInfo[i][10 - 1 - j] = &createNewBox((i + j) % 4 + 4);
-			boxInfo[i][10 - 1 - j]->setX((float) i * boxNS::WIDTH);
-			boxInfo[i][10 - 1 - j]->setY((float) (10 - 1 - j) * boxNS::HEIGHT);
+			boxInfo[i][10 - 1 - j]->setX((float)i * boxNS::WIDTH);
+			boxInfo[i][10 - 1 - j]->setY((float)(10 - 1 - j) * boxNS::HEIGHT);
 			boxInfo[i][10 - 1 - j]->setFieldX(i);
 			boxInfo[i][10 - 1 - j]->setFieldY(10 - 1 - j);
 		}
@@ -270,6 +294,9 @@ void CrushedBox::roundStart()
 	chainCount = 0;
 	// 連鎖用のタイマーの初期化
 	chainTimer = 0.0f;
+	// ゲーム終了時に表示するテロップの位置を初期化
+	gamefinishTelop.setX(GAME_WIDTH / 2.0f - gamefinishTelop.getWidth() / 2.0f);
+	gamefinishTelop.setY((float)-gamefinishTelop.getHeight());
 	// プレイ中BGM再生
 	audio->playCue(MAIN_BGM);
 }
@@ -306,6 +333,8 @@ void CrushedBox::render()
 		break;
 	case crushedBoxNS::COUNT_DOWN:
 		// カウントダウン中も、ゲーム画面のレンダリングは行う
+	case crushedBoxNS::PRE_FINISHED:
+		// 終了時のテロップ表示中も、ゲーム画面のレンダリングは行う
 	case crushedBoxNS::ROUND:
 		// プレイ中の場合
 		// 背景の描画
@@ -336,6 +365,11 @@ void CrushedBox::render()
 		{
 			_snprintf_s(buffer, crushedBoxNS::BUF_SIZE, "%d", (int)(ceil(countDownTimer)));
 			fontBig.print(buffer, crushedBoxNS::COUNT_DOWN_X, crushedBoxNS::COUNT_DOWN_Y);
+		}
+		// 終了時のテロップ表示中であれば、さらにテロップも表示
+		else if (state == crushedBoxNS::PRE_FINISHED)
+		{
+			gamefinishTelop.draw();
 		}
 		break;
 	case crushedBoxNS::FINISHED:
@@ -469,10 +503,10 @@ Box& CrushedBox::createNewBox()
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// ボックスの初期位置指定
-	newBox->setX((float) (rand() % 10) * boxNS::WIDTH);
-	newBox->setFieldX((int) newBox->getX() / boxNS::WIDTH);
-	newBox->setY((float) boxNS::HEIGHT);
-	newBox->setFieldY((int) newBox->getY() / boxNS::HEIGHT);
+	newBox->setX((float)(rand() % 10) * boxNS::WIDTH);
+	newBox->setFieldX((int)newBox->getX() / boxNS::WIDTH);
+	newBox->setY((float)boxNS::HEIGHT);
+	newBox->setFieldY((int)newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
 
@@ -486,10 +520,10 @@ Box& CrushedBox::createNewBox(int bt)
 	if (!newBox->initialize(this, boxNS::WIDTH, boxNS::HEIGHT, boxNS::TEXTURE_COLS, &boxTextures))
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing box"));
 	// ボックスの初期位置指定
-	newBox->setX((float) (rand() % 10) * boxNS::WIDTH);
-	newBox->setFieldX((int) newBox->getX() / boxNS::WIDTH);
-	newBox->setY((float) boxNS::HEIGHT);
-	newBox->setFieldY((int) newBox->getY() / boxNS::HEIGHT);
+	newBox->setX((float)(rand() % 10) * boxNS::WIDTH);
+	newBox->setFieldX((int)newBox->getX() / boxNS::WIDTH);
+	newBox->setY((float)boxNS::HEIGHT);
+	newBox->setFieldY((int)newBox->getY() / boxNS::HEIGHT);
 	return *newBox;
 }
 
